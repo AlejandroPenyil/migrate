@@ -53,7 +53,8 @@ public class MigrateApplication implements CommandLineRunner {
                 System.err.println("Error guardando las propiedades: " + e.getMessage());
             }
 
-            File f = new File("C:\\\\soincon\\\\EMI\\\\Cross-Solutions\\\\Documents\\\\RepoTest");
+
+            File f = new File("C:\\opt\\tools\\tomcat\\latest\\files\\clients");
             f.mkdirs();
 
             log.info("Empezando a migrar todo a esta ubicacion "+f.getAbsolutePath());

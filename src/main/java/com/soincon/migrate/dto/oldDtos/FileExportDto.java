@@ -1,4 +1,4 @@
-package com.soincon.migrate.dto;
+package com.soincon.migrate.dto.oldDtos;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,23 +9,21 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class DownloadDto {
+public class FileExportDto {
 
-    String authority;
-    Object content;
-    Integer defaultPort;
-    Object deserializedFields;
+	boolean active;
+    DownloadDto download;
+    String expirationDate; // Date
     String file;
-    String host;
-    String path;
-    Integer port;
-    String protocol;
-    String query;
-    String ref;
-    Integer serializedHashCode;
-    String serInfo;
+    String id;
+    String insertDate; // Date
+    String modificationDate; // Date
+    Integer versionLock;
 
 
+//	{
+//              "active": true,
+//              "download": {
 //                    "authority": "string",
 //                    "content": {},
 //                    "defaultPort": 0,
@@ -39,5 +37,14 @@ public class DownloadDto {
 //                    "ref": "string",
 //                    "serializedHashCode": 0,
 //                    "userInfo": "string"
+//              },
+//            "expirationDate": "string",
+//            "file": "string",
+//            "id": "string",
+//            "insertDate": "string",
+//            "modificationDate": "string",
+//            "versionLock": 0
+
+
 
 }

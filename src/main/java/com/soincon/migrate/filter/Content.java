@@ -1,12 +1,11 @@
-package com.soincon.migrate.dto;
+package com.soincon.migrate.filter;
 
 import lombok.Data;
 
 @Data
-public class DirectoryDto {
+public class Content {
     private String id;
-    private String name;
+    private String exactName;
     private String parentDirectoryId;
     private String pathBase;
-    private Integer versionLock;
 }

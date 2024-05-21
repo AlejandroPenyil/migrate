@@ -1,4 +1,4 @@
-package com.soincon.migrate.dto;
+package com.soincon.migrate.dto.oldDtos;
 
 
 import lombok.Getter;

@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 public class RetroFitClientOld {
     private static Retrofit retrofit;
-    private static String baseUrl;
 
     public static Retrofit getInstanceRetrofit() throws IOException {
         Properties prop=new Properties();
@@ -19,7 +18,7 @@ public class RetroFitClientOld {
         prop.load(in);
         in.close();
 
-        baseUrl = prop.getProperty("api.base.url");
+        String baseUrl = prop.getProperty("api.base.url");
 
         if (retrofit == null){
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(600, TimeUnit.SECONDS);

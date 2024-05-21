@@ -1,7 +1,9 @@
 package com.soincon.migrate.iservice;
 
 
-import com.soincon.migrate.dto.FileDto;
+import com.soincon.migrate.dto.oldDtos.FileDto;
+import com.soincon.migrate.filter.FilterDirectory;
+import com.soincon.migrate.filter.PaginatedList;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -23,6 +25,6 @@ public interface FileService {
                              @Query("false") boolean createInexsistentFileType,
                              @Body FileDto dto);
 
-//    @POST("/files/searchAll")
-//    Call<PaginatedList<FileDto>> searchFilesByFilter(@Body FilterDirectory filterDirectory);
+    @POST("/files/searchAll")
+    Call<PaginatedList<FileDto>> searchFilesByFilter(@Body FilterDirectory filterDirectory);
 }
