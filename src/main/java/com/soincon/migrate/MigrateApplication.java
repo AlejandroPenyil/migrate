@@ -1,18 +1,23 @@
 package com.soincon.migrate;
 
+import com.soincon.migrate.logic.MigrateSystem;
 import lombok.extern.log4j.Log4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
+/**
+ * Introducir como variables:
+ *  Api nueva, api antigua, rutas a migrar
+ */
+
 @SpringBootApplication
-//@Log4j
+@Log4j
 public class MigrateApplication implements CommandLineRunner {
+
 
     public static void main(String[] args) {
         SpringApplication.run(MigrateApplication.class, args);
@@ -21,18 +26,42 @@ public class MigrateApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (args.length >= 2) {
+        if (args.length >= 3) {
             System.out.println("bien hecho");
-            Properties p = new Properties();
-            InputStream propertiesStream = getClass().getClassLoader().getResourceAsStream("application.properties");
-            p.load(propertiesStream);
-            propertiesStream.close();
+            Properties properties = new Properties();
+            String propertiesFilePath = "src/main/resources/application.properties";
 
-            p.setProperty("api.base.url",args[0]);
-            p.store(new FileWriter("application.properties"),"Actualizada la base de datos");
+            // Cargar las propiedades desde un archivo en el sistema de archivos
+            try (FileInputStream propertiesStream = new FileInputStream(propertiesFilePath)) {
+                properties.load(propertiesStream);
+            } catch (IOException e) {
+                System.err.println("Error cargando las propiedades: " + e.getMessage());
+                return;
+            }
+
+            // Establecer nuevas propiedades
+            properties.setProperty("api.base.url", args[1]);
+            properties.setProperty("api2.base.url", args[0]);
+            System.out.println("Propiedades actualizadas con nuevos valores."+properties.getProperty("api.base.url")+properties.getProperty("api2.base.url"));
+
+            MigrateSystem migrateSystem = new MigrateSystem();
+
+            // Guardar las propiedades en el archivo
+            try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
+                properties.store(propertiesOutputStream, "Actualizada la base de datos");
+            } catch (IOException e) {
+                System.err.println("Error guardando las propiedades: " + e.getMessage());
+            }
 
             File f = new File("C:\\\\soincon\\\\EMI\\\\Cross-Solutions\\\\Documents\\\\RepoTest");
             f.mkdirs();
+
+            log.info("Empezando a migrar todo a esta ubicacion "+f.getAbsolutePath());
+
+            for (int i = 2; i < args.length; i++) {
+                log.info("Modificando a migrar todo de esta ubicacion "+args[i]);
+                migrateSystem.migrate(args[i]);
+            }
         }
     }
 }
