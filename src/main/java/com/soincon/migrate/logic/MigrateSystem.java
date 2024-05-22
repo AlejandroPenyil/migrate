@@ -1,9 +1,6 @@
 package com.soincon.migrate.logic;
 
-import com.soincon.migrate.dto.newDtos.ContentNew;
-import com.soincon.migrate.dto.newDtos.DocumentCreateDto;
 import com.soincon.migrate.dto.newDtos.DocumentDto;
-import com.soincon.migrate.dto.newDtos.FilterDocument;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
 import com.soincon.migrate.filter.Content;
@@ -24,7 +21,7 @@ public class MigrateSystem {
     ImplNew implNew;
 
     private String pathBase = "C:\\opt\\tools\\tomcat\\latest\\files\\clients";
-    private long idParent = 51;
+//    private long idParent = 51;
 
     public MigrateSystem() throws IOException {
         this.implNew = new ImplNew();
@@ -35,19 +32,21 @@ public class MigrateSystem {
         File file = new File(path);
         if (file.exists()) {
             if (file.isDirectory()) {
-                if (!comprobar(file)) {
+                DocFolderMigration docFolderMigration = new DocFolderMigration(file);
+                if (!docFolderMigration.isExist()) {
                     DocumentDto documentDto = new DocumentDto();
                     documentDto.setName(file.getName().toLowerCase());
                     documentDto.setTypeDoc("FOLDER");
-                    documentDto.setIdParent(parentId(file));
+                    documentDto.setIdParent(docFolderMigration.getIdParent());
 
                     documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
-                    idParent = documentDto.getIdDocument();
+                    log.info(documentDto.toString());
                 }
                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
                     migrate(subFile.getAbsolutePath());
                 }
             } else {
+                DocFolderMigration docFolderMigration = new DocFolderMigration(file);
                 int i = 1;
                 boolean tr = false;
 
@@ -70,7 +69,7 @@ public class MigrateSystem {
                         DocumentDto documentDto = new DocumentDto();
                         documentDto.setName(name.toLowerCase());
                         documentDto.setTypeDoc("DOC");
-                        documentDto.setIdParent((long) idParent);
+                        documentDto.setIdParent(docFolderMigration.getIdParent());
 
                         documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                         if (documentDto != null) {
@@ -84,75 +83,64 @@ public class MigrateSystem {
     }
 
     /**
-     *      Method to obtain the parentId in case of you need to create a folder in the database
-    * */
-    private Long parentId(File file) throws IOException {
-        long id = idParent;
-        FilterDocument filterDirectory = new FilterDocument();
-        ContentNew contentNew = new ContentNew();
-
-        contentNew.setName(file.getParentFile().getName().toLowerCase());
-
-        filterDirectory.setContent(contentNew);
-        //TODO mejorar la manera de comprobar el parent id
-        List<DocumentCreateDto> documentDtos = implNew.findAllDocuments(filterDirectory);
-        if (documentDtos != null) {
-            if (documentDtos.size() > 1) {
-                for (DocumentCreateDto documentDto : documentDtos) {
-                    contentNew.setName(file.getParentFile().getParentFile().getName().toLowerCase());
-                    filterDirectory.setContent(contentNew);
-
-                    documentDtos = implNew.findAllDocuments(filterDirectory);
-                    if (documentDtos != null) {
-                        if (documentDtos.size() == 1) {
-                            id = documentDtos.get(0).getIdDoc();
-                            return id;
-                        }else if (documentDtos.size() > 1) {
-                            parentId(file.getParentFile());
-                        }
-                    }
-                }
-            } else if (documentDtos.size() == 1) {
-                contentNew.setName(file.getParentFile().getParentFile().getName().toLowerCase());
-                filterDirectory.setContent(contentNew);
-
-                documentDtos = implNew.findAllDocuments(filterDirectory);
-                if (documentDtos.size() == 1) {
-                    id = documentDtos.get(0).getIdDoc();
-                    return id;
-                }
-            }
-        }
-        return id;
-    }
-
-    private boolean comprobar(File file) throws IOException {
-        FilterDocument filterDirectory = new FilterDocument();
-        ContentNew contentNew = new ContentNew();
-
-        contentNew.setName(file.getName().toLowerCase());
-
-        filterDirectory.setContent(contentNew);
-
-        List<DocumentCreateDto> documentDtos = implNew.findAllDocuments(filterDirectory);
-
-        if (documentDtos != null) {
-            if (documentDtos.size() > 1) {
-                for (DocumentCreateDto documentDto : documentDtos) {
-                    if (documentDto.getIdParent() == idParent) {
-                        idParent = documentDto.getIdDoc();
-                        return true;
-                    }
-                }
-            } else if (documentDtos.size() == 1) {
-                if (documentDtos.get(0).getIdParent() == idParent) {
-                    idParent = documentDtos.get(0).getIdDoc();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+     * Method to obtain the parentId in case of you need to create a folder in the database
+     */
+//    private long parentId(File file) throws IOException {
+//        long id = idParent;
+//        DocumentDto documentDto = new DocumentDto();
+//
+//        documentDto.setName(file.getParentFile().getName().toLowerCase());
+//        documentDto.setTypeDoc("FOLDER");
+//
+//        //TODO mejorar la manera de comprobar el parent id
+//        List<DocumentDto> documentDtos = implNew.search(documentDto);
+//        if (documentDtos != null) {
+//            if (documentDtos.size() > 1) {
+//                id = parentId(file.getParentFile());
+//                for (DocumentDto document : documentDtos) {
+//                    if(document.getIdParent() != null) {
+//                        if (document.getIdParent() == id) {
+//                            return document.getIdDocument();
+//                        }
+//                    }
+//                }
+//            } else if (documentDtos.size() == 1) {
+//                documentDto.setName(file.getParentFile().getParentFile().getName());
+//
+//                documentDtos = implNew.search(documentDto);
+//                if (documentDtos.size() == 1) {
+//                    id = documentDtos.get(0).getIdDocument();
+//                    return id;
+//                }
+//            }
+//        }
+//        return id;
+//    }
+//
+//    private boolean comprobar(File file) throws IOException {
+//        DocumentDto documentDto = new DocumentDto();
+//
+//        documentDto.setName(file.getName().toLowerCase());
+//
+//        List<DocumentDto> documentDtos = implNew.search(documentDto);
+//
+//        if (documentDtos != null) {
+//            if (documentDtos.size() > 1) {
+//                for (DocumentDto document : documentDtos) {
+//                    if (document.getIdParent() == idParent) {
+//                        idParent = document.getIdDocument();
+//                        return true;
+//                    }
+//                }
+//            } else if (documentDtos.size() == 1) {
+//                if (documentDtos.get(0).getIdParent() == idParent) {
+//                    idParent = documentDtos.get(0).getIdDocument();
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
     private File asignarExtension(File file) throws IOException {
         FilterDirectory filterDirectory = new FilterDirectory();

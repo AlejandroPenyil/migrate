@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -60,8 +61,11 @@ public class MigrateApplication implements CommandLineRunner {
             log.info("Empezando a migrar todo a esta ubicacion "+f.getAbsolutePath());
 
             for (int i = 2; i < args.length; i++) {
+                // dir /a-d /s /b C:\opt\tools\tomcat\latest | find /c /v ""
+                // dir /ad /s /b C:\opt\tools\tomcat\latest | find /c /v ""
                 log.info("Modificando a migrar todo de esta ubicacion "+args[i]);
                 migrateSystem.migrate(args[i]);
+
             }
         }
     }

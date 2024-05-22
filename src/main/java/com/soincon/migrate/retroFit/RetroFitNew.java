@@ -2,7 +2,6 @@ package com.soincon.migrate.retroFit;
 
 import com.soincon.migrate.security.AuthInterceptor;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
