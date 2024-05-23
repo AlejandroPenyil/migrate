@@ -18,11 +18,16 @@ public class DocFolderMigration {
     ImplNew implNew;
     private long idParent;
     private boolean exist;
+    private DocumentDto documentDto;
 
-    public DocFolderMigration(File file) throws IOException {
+    public DocFolderMigration(File file, DocumentDto parent) throws IOException {
         this.implNew = new ImplNew();
+        this.documentDto = parent;
         this.exist = isExist(file);
-        this.idParent = parentId(file);
+        if(!this.exist) {
+            this.idParent = parentId(file);
+        }
+
     }
 
     private long parentId(File file) throws IOException {
@@ -30,14 +35,23 @@ public class DocFolderMigration {
         documentDto.setTypeDoc("FOLDER");
         documentDto.setName(file.getParentFile().getName());
 
-        List<DocumentDto> documentDtos = implNew.search(documentDto);
-        if (!documentDtos.isEmpty()) {
-            for (DocumentDto documentDto2 : documentDtos) {
-                String path = makePath(documentDto2);
+        if(this.documentDto != null){
+            documentDto.setIdDocument(this.documentDto.getIdDocument());
+        }
 
-                if (path.equals(file.getParentFile().getAbsolutePath())) {
-                    return documentDto2.getIdDocument();
+        List<DocumentDto> documentDtos = implNew.search(documentDto);
+
+        if (!documentDtos.isEmpty()) {
+            if(documentDtos.size()>1) {
+                for (DocumentDto documentDto2 : documentDtos) {
+                    String path = makePath(documentDto2);
+
+                    if (path.equals(file.getParentFile().getAbsolutePath())) {
+                        return documentDto2.getIdDocument();
+                    }
                 }
+            }else{
+                return documentDtos.get(0).getIdDocument();
             }
         }
 
@@ -63,12 +77,17 @@ public class DocFolderMigration {
 
         documentDto.setName(file.getName().toLowerCase());
 
+        if(this.documentDto != null){
+            documentDto.setIdParent(this.documentDto.getIdDocument());
+        }
+
         List<DocumentDto> documentDtos = implNew.search(documentDto);
 
         if (!documentDtos.isEmpty()) {
             for (DocumentDto documentDto2 : documentDtos) {
                 String path = makePath(documentDto2);
                 if (path.equals(file.getAbsolutePath())) {
+                    this.documentDto = documentDto2;
                     return true;
                 }
             }

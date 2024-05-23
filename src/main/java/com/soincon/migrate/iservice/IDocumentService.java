@@ -14,7 +14,10 @@ public interface IDocumentService {
     Call<DocumentDto> createDocument(@Query("pathbase") String path, @Body DocumentDto documentDto);
 
     @GET("document/search")
-    Call<List<DocumentDto>> searchDocument(@Query("name") String name, @Query("typeDoc") String typeDoc);
+    Call<List<DocumentDto>> searchDocument(@Query("name") String name,
+                                           @Query("typeDoc") String typeDoc,
+                                           @Query("idParent") Long id,
+                                           @Query("idDocument") Long idDocument);
 
     @GET("document/{id}")
     Call<DocumentDto> getDocument(@Path("id") long id);

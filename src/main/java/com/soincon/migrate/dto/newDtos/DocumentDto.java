@@ -8,7 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class DocumentDto {
-    private Integer idDocument;
+    private Long idDocument;
     private String name;
     private String mimeType;
     private String typeDoc;
