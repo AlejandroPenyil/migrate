@@ -13,8 +13,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
-import static com.soincon.migrate.logic.MigrateSystem.fi;
-
 /**
  * Introducir como variables:
  * Api nueva, api antigua
@@ -27,7 +25,7 @@ import static com.soincon.migrate.logic.MigrateSystem.fi;
 public class MigrateApplication implements CommandLineRunner, Runnable {
     public static int totalFilesAndDirectories;
 
-    private File f = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
+    public static File f = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
     private File odl = new File("c:\\opt\\tools\\tomcat\\latest\\files\\clients");
 
     @CommandLine.Option(names = {"-a1", "--api1"}, description = "URL base para la API de la que se va a migrar", required = true)
@@ -53,7 +51,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.exit(exitCode);
     }
 
-
+    /**
+     * ejecutar el programa en la la consola de picocli
+     */
     @Override
     public void run() {
         WarningUtil.showWarning("IMPORTANTE", "Este programa hará cambios en el sistema de archivos y no se podrán recuperar");
@@ -109,7 +109,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         log.info("Empezando a migrar todo a esta ubicacion " + pathroot);
         f = new File(newRoot);
-        f.mkdir();
+        f.mkdirs();
 
         try {
             migrateSystem.cleanRoot(pathroot, newRoot);
@@ -127,6 +127,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+        System.out.println();
         log.info("Migración completada.");
 
         WarningUtil.showWarning("ALERTA", "Quieres borrar las carpetas del root antiguo. Si lo borras no lo podrás recuperar más tarde. S/N");
@@ -151,6 +152,12 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.out.println("Programa terminado");
     }
 
+    /**
+     * metodo que cuenta la cantidad de fichero y directorios de manera recursiva para
+     * que funcione el progressbar
+     * @param file
+     * @return
+     */
     private int countFilesAndDirectories(File file) {
         int count = 0;
         if (file.isDirectory()) {
