@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -24,8 +25,10 @@ import static com.soincon.migrate.logic.MigrateSystem.fi;
 @CommandLine.Command(name = "migrate", mixinStandardHelpOptions = true, version = "1.0",
         description = "MigrateApplication realiza tareas de migración.")
 public class MigrateApplication implements CommandLineRunner, Runnable {
+    public static int totalFilesAndDirectories;
 
-    public static File f = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
+    private File f = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
+    private File odl = new File("c:\\opt\\tools\\tomcat\\latest\\files\\clients");
 
     @CommandLine.Option(names = {"-a1", "--api1"}, description = "URL base para la API de la que se va a migrar", required = true)
     private String api1Url;
@@ -56,11 +59,15 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         WarningUtil.showWarning("IMPORTANTE", "Este programa hará cambios en el sistema de archivos y no se podrán recuperar");
 
         Properties properties = new Properties();
-        String propertiesFilePath = "src/main/resources/application.properties";
+        String propertiesFilePath = "application.properties";
 
         // Cargar las propiedades desde un archivo en el sistema de archivos
-        try (FileInputStream propertiesStream = new FileInputStream(propertiesFilePath)) {
-            properties.load(propertiesStream);
+        try (InputStream inputStream = MigrateApplication.class.getClassLoader().getResourceAsStream(propertiesFilePath)) {
+            if (inputStream != null) {
+                properties.load(inputStream);
+            } else {
+                System.err.println("No se encontró el archivo " + propertiesFilePath);
+            }
         } catch (IOException e) {
             System.err.println("Error cargando las propiedades: " + e.getMessage());
             return;
@@ -85,14 +92,22 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             System.err.println("Error guardando las propiedades: " + e.getMessage());
         }
 
-        log.info("Empezando a migrar todo a esta ubicacion " + f.getAbsolutePath());
-
         Scanner src = new Scanner(System.in);
-        System.out.println("Pasa la ubicacion de root para limpiar");
+        System.out.println("Pasa la ubicación de root para limpiar (deja vacío para usar la ruta por defecto): "+odl);
         String pathroot = src.nextLine();
-        System.out.println("Escribe la nueva ubicacion de root");
-        String newRoot = src.nextLine();
+        if (pathroot.isEmpty()) {
+            pathroot = odl.getAbsolutePath();
+            System.out.println("Usando la ruta por defecto: " + pathroot);
+        }
 
+        System.out.println("Escribe la nueva ubicación de root (deja vacío para usar la ruta por defecto): "+f);
+        String newRoot = src.nextLine();
+        if (newRoot.isEmpty()) {
+            newRoot = f.getAbsolutePath();
+            System.out.println("Usando la ruta por defecto: " + newRoot);
+        }
+
+        log.info("Empezando a migrar todo a esta ubicacion " + pathroot);
         f = new File(newRoot);
         f.mkdir();
 
@@ -102,11 +117,14 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        log.info("Modificando a migrar todo de esta ubicacion " + pathroot);
+        log.info("Modificando a migrar todo de esta ubicación " + pathroot);
         log.info("Esto llevara un rato...");
+
+        File file = new File(pathroot);
+        totalFilesAndDirectories = countFilesAndDirectories(file);
         try {
             migrateSystem.migrate(pathroot, null, f);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
         log.info("Migración completada.");
@@ -125,12 +143,25 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     System.out.println("Terminando el programa");
                     break;
                 default:
-                    System.out.println("Elige una opcion S/N");
+                    System.out.println("Elige una opción S/N");
                     t = true;
                     break;
             }
         } while (t);
         System.out.println("Programa terminado");
+    }
+
+    private int countFilesAndDirectories(File file) {
+        int count = 0;
+        if (file.isDirectory()) {
+            count++; // Contar el directorio actual
+            for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                count += countFilesAndDirectories(subFile); // Recursivamente contar los archivos y directorios dentro del directorio actual
+            }
+        } else {
+            count++; // Contar el archivo actual
+        }
+        return count;
     }
 
     @Override
