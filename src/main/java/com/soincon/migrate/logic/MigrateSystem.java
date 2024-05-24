@@ -9,19 +9,14 @@ import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
 //import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +28,7 @@ import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
 public class MigrateSystem {
     ImplOld implOld;
     ImplNew implNew;
-    public static int fi=0;
+    public static int fi = 0;
 
     public MigrateSystem() throws IOException {
         this.implNew = new ImplNew();
@@ -56,17 +51,16 @@ public class MigrateSystem {
                     }
 
                     documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
-                    log.info(documentDto.toString());
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
                         migrate(subFile.getAbsolutePath(), documentDto, directory);
                     }
-                }else {
+                } else {
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
                         migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
                     }
                 }
             } else {
-                if(exists(file)) {
+                if (exists(file)) {
                     File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
                     file.renameTo(directory);
 
@@ -99,16 +93,13 @@ public class MigrateSystem {
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                             fi++;
                             if (documentDto != null) {
-                                log.info(documentDto.toString());
                                 createVersion(documentDto, i, fullName);
                                 fi--;
-                            } else {
-                                log.info(documentDto);
                             }
                         }
                         i++;
                     } while (!tr);
-                }else{
+                } else {
                     File file2 = Paths.get(String.valueOf(newPath), "notfound").toFile();
                     file2.mkdir();
                     file.renameTo(new File(file2 + "\\" + file.getName()));
@@ -127,7 +118,7 @@ public class MigrateSystem {
 
         if (!fileDtoList.isEmpty()) {
             for (FileDto fileDto : fileDtoList) {
-                if(file.getParentFile().getAbsolutePath().equalsIgnoreCase(fileDto.getPathBase())){
+                if (file.getParentFile().getAbsolutePath().equalsIgnoreCase(fileDto.getPathBase())) {
                     return true;
                 }
             }
@@ -140,6 +131,7 @@ public class MigrateSystem {
         documentVersionDto.setIdVersion(i);
         documentVersionDto.setIdDocument(documentDto.getIdDocument());
         documentVersionDto.setExternalCode(fullName);
+        obtenerToken();
         documentVersionDto.setIdUser(114);
         documentVersionDto.setReason("migrate");
         documentVersionDto.setVersionStatus("VALID");
@@ -150,17 +142,26 @@ public class MigrateSystem {
     }
 
     private Integer obtenerToken() {
-        //TODO no puedo recoger la secret key del token,
+        Integer idUser = 1;
+
         String[] chunks = Jwtoken.getToken().split("\\.");
 
         Base64.Decoder decoder = Base64.getUrlDecoder();
 
         String header = new String(decoder.decode(chunks[0]));
         String payload = new String(decoder.decode(chunks[1]));
+        String signature = new String(decoder.decode(chunks[2]));
 
-        SignatureAlgorithm sa = SignatureAlgorithm.HS256;
-//        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), sa.getJcaName());
-        return 114;
+        String[] code = payload.split(",");
+
+        for (String s : code) {
+            if (s.contains("userId")) {
+                String[] id = s.split(":");
+                idUser = Integer.valueOf(id[1]);
+            }
+        }
+
+        return idUser;
     }
 
     private String getMimeType(String fullName) throws IOException {
@@ -174,7 +175,7 @@ public class MigrateSystem {
             if (fileTypeDto.getExtension().equals(fullName)) {
                 lastIndex = fileTypeDto.getMimeType().lastIndexOf('/');
                 if (lastIndex != -1) {
-                    fullName = fileTypeDto.getMimeType().substring(0, lastIndex)+"/"+fileTypeDto.getName();
+                    fullName = fileTypeDto.getMimeType().substring(0, lastIndex) + "/" + fileTypeDto.getName();
                 }
                 return fullName;
 
@@ -222,19 +223,77 @@ public class MigrateSystem {
         return fileName;
     }
 
-    public void cleanRoot() {
-        //TODO preguntar si todos los documentos que estan en root se meten en la base de datos o solo los que esten en la base de datos antigua
-        String currentDirectory = System.getProperty("user.dir");
-        Path path = Paths.get(currentDirectory).getRoot();
+    public void cleanRoot(String pathroot, String newRoot) throws IOException {
+
+        Path path = Paths.get(pathroot);
         File directory = path.toFile();
 
+        File newDirectory = new File(newRoot);
+        path = Paths.get(newDirectory.getAbsolutePath(), "new");
+        File file2 = path.toFile();
+        file2.mkdir();
+
+        DocumentDto documentDto = createNew(file2);
+
         for (File file : Objects.requireNonNull(directory.listFiles(File::isFile))) {
-            path = Paths.get(f.getAbsolutePath(),"new");
-            File file2 = path.toFile();
-            file2.mkdir();
-            path = Paths.get(path.toFile().getAbsolutePath(),file.getName());
-            file2 = path.toFile();
-            file.renameTo(file2);
+            if (!exists(file)) {
+                path = Paths.get(path.toFile().getAbsolutePath(), file.getName());
+                file2 = path.toFile();
+                file.renameTo(file2);
+            } else {
+                int i = 1;
+                boolean tr = false;
+
+                String extension = FilenameUtils.getExtension(directory.getAbsolutePath());
+
+                if (extension.isEmpty()) {
+                    File file3 = asignarExtension(directory);
+                    if (directory.renameTo(file3)) {
+                        directory = file3;
+                    }
+                    extension = FilenameUtils.getExtension(directory.getAbsolutePath());
+
+                }
+
+                String name = quitarExtension(directory);
+                do {
+                    String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
+                    file2 = new File(directory.getParentFile().getPath() + "\\" + fullName);
+                    if (directory.renameTo(file2)) {
+
+                        DocumentDto documentDto1 = new DocumentDto();
+                        documentDto1.setTypeDoc("DOC");
+                        documentDto1.setName(file.getName());
+                        documentDto1.setIdParent(documentDto.getIdParent());
+                        documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
+                        if (documentDto1 != null) {
+                            log.info(documentDto.toString());
+                            createVersion(documentDto, i, fullName);
+                        } else {
+                            log.info(documentDto);
+                        }
+                    }
+                } while (!tr);
+            }
         }
+    }
+
+    private DocumentDto createNew(File file) throws IOException {
+        DocumentDto documentDto = new DocumentDto();
+        documentDto.setName(file.getName());
+        documentDto.setTypeDoc("FOLDER");
+        return implNew.createDocument(documentDto, file.getParentFile().getAbsolutePath());
+    }
+
+    public void borrar(String path) {
+        File file = new File(path);
+        if(file.listFiles() != null) {
+            for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                borrar(subFile.getPath());
+            }
+            System.out.println(path);
+
+        }
+        file.delete();
     }
 }
