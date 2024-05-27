@@ -9,7 +9,7 @@ import com.soincon.migrate.filter.Content;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -26,12 +26,14 @@ import static com.soincon.migrate.MigrateApplication.f;
 import static com.soincon.migrate.MigrateApplication.totalFilesAndDirectories;
 import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
 
-@Log4j
+@Log4j2
 public class MigrateSystem {
     ImplOld implOld;
     ImplNew implNew;
     public static int fi = 0;
     static int currentStep = 1;
+    private Thread stopwatchThread;
+    private long startTime = -1;
 
     public MigrateSystem() throws IOException {
         this.implNew = new ImplNew();
@@ -80,7 +82,8 @@ public class MigrateSystem {
                     boolean t = true;
                     int i = 0;
                     do {
-                        if (file.renameTo(new File(file2 + "\\" + i + file.getName()))) {
+                        file2 = new File(file2 + "\\" + i + file.getName());
+                        if (file2.mkdir()) {
                             t = false;
                         } else {
                             i++;
@@ -105,6 +108,8 @@ public class MigrateSystem {
                         }
                         extension = FilenameUtils.getExtension(directory.getAbsolutePath());
 
+                    }else{
+                        extension = FilenameUtils.getExtension(asignarExtension(directory).getAbsolutePath());
                     }
 
                     String name = quitarExtension(directory);
@@ -123,6 +128,8 @@ public class MigrateSystem {
                             if (documentDto != null) {
                                 createVersion(documentDto, i, fullName,file2);
                                 fi--;
+                            }else{
+                                log.info("Esto lo tienes que revisar{}", file);
                             }
                         }
                         i++;
@@ -170,13 +177,13 @@ public class MigrateSystem {
      */
     private void showProgressIndicator(int currentStep, int totalSteps) {
         int progressBarLength = 85; // Longitud total de la barra de progreso
-        int completedBlocks = currentStep * progressBarLength / totalSteps;
-        int remainingBlocks = progressBarLength - completedBlocks;
+        double completedBlocks = (double) currentStep * progressBarLength / totalSteps;
+        int remainingBlocks = progressBarLength - (int) completedBlocks;
 
-        int percentage = currentStep * 100 / totalSteps;
+        int percentage = (int) (currentStep * 100.0 / totalSteps); // División como punto flotante
 
         StringBuilder progressBar = new StringBuilder("[");
-        for (int i = 0; i < completedBlocks; i++) {
+        for (int i = 0; i < (int) completedBlocks; i++) {
             progressBar.append("\u2588"); // Carácter Unicode para un bloque lleno
         }
         for (int i = 0; i < remainingBlocks; i++) {
@@ -368,46 +375,84 @@ public class MigrateSystem {
 
         if (files != null) {
             for (File file : files) {
-                if (!exists(file)) {
-                    path = Paths.get(String.valueOf(f), "notFound");
-                    file2 = path.toFile();
-                    file2.mkdirs();
-                    file.renameTo(new File(file2+ "\\" + file.getName()));
-                } else {
-                    file2.mkdir();
-                    int i = 1;
-                    boolean tr = false;
+                if(file.isFile()) {
+                    if (!exists(file)) {
+                        path = Paths.get(String.valueOf(f), "notFound");
+                        file2 = path.toFile();
+                        file2.mkdirs();
+                        file.renameTo(new File(file2 + "\\" + file.getName()));
+                    } else {
+                        file2.mkdir();
+                        int i = 1;
+                        boolean tr = false;
 
-                    String extension = FilenameUtils.getExtension(file.getAbsolutePath());
+                        String extension = FilenameUtils.getExtension(file.getAbsolutePath());
 
-                    if (extension.isEmpty()) {
-                        File file3 = asignarExtension(directory);
-                        if (file.renameTo(file3)) {
-                            file = file3;
-                        }
-                        extension = FilenameUtils.getExtension(file.getAbsolutePath());
-
-                    }
-
-                    String name = quitarExtension(directory);
-                    do {
-                        String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                        file2 = new File(file2 + "\\" + fullName);
-                        if (directory.renameTo(file2)) {
-
-                            DocumentDto documentDto1 = new DocumentDto();
-                            documentDto1.setTypeDoc("DOC");
-                            documentDto1.setName(file.getName());
-                            documentDto1.setIdParent(documentDto.getIdParent());
-                            documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
-                            if (documentDto1 != null) {
-                                log.info(documentDto.toString());
-                                createVersion(documentDto, i, fullName, file2);
-                            } else {
-                                log.info(documentDto);
+                        if (extension.isEmpty()) {
+                            File file3 = asignarExtension(directory);
+                            if (file.renameTo(file3)) {
+                                file = file3;
                             }
+                            extension = FilenameUtils.getExtension(file.getAbsolutePath());
+
                         }
-                    } while (!tr);
+
+                        String name = quitarExtension(directory);
+                        do {
+                            String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
+                            file2 = new File(file2 + "\\" + fullName);
+                            if (directory.renameTo(file2)) {
+
+                                DocumentDto documentDto1 = new DocumentDto();
+                                documentDto1.setTypeDoc("DOC");
+                                documentDto1.setName(file.getName());
+                                documentDto1.setIdParent(documentDto.getIdParent());
+                                documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
+                                if (documentDto1 != null) {
+                                    log.info(documentDto.toString());
+                                    createVersion(documentDto, i, fullName, file2);
+                                } else {
+                                    log.info(documentDto);
+                                }
+                            }
+                        } while (!tr);
+                    }
+                }else{
+                    if (!exists(file)) {
+                        path = Paths.get(String.valueOf(f), "notFound");
+                        file2 = path.toFile();
+                        file2.mkdirs();
+                        file = new File(file2 + "\\" + file.getName());
+                        file.mkdir();
+                    } else {
+                        file2.mkdir();
+                        int i = 1;
+                        boolean tr = false;
+
+                        String extension = FilenameUtils.getExtension(file.getAbsolutePath());
+
+                        if (extension.isEmpty()) {
+                            File file3 = asignarExtension(directory);
+                            if (file.renameTo(file3)) {
+                                file = file3;
+                            }
+                            extension = FilenameUtils.getExtension(file.getAbsolutePath());
+
+                        }
+
+                        String name = quitarExtension(directory);
+                        do {
+                            file2 = new File(file2 + "\\" + file.getName());
+                            if (file2.mkdir()) {
+
+                                DocumentDto documentDto1 = new DocumentDto();
+                                documentDto1.setTypeDoc("DOC");
+                                documentDto1.setName(file.getName());
+                                documentDto1.setIdParent(documentDto.getIdParent());
+                                documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
+                            }
+                        } while (!tr);
+                    }
                 }
             }
         } else {

@@ -1,8 +1,10 @@
 package com.soincon.migrate;
 
+import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
-import lombok.extern.log4j.Log4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +21,7 @@ import java.util.Scanner;
  */
 
 @SpringBootApplication
-@Log4j
+@Log4j2
 @CommandLine.Command(name = "migrate", mixinStandardHelpOptions = true, version = "1.0",
         description = "MigrateApplication realiza tareas de migración.")
 public class MigrateApplication implements CommandLineRunner, Runnable {
@@ -66,17 +68,17 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             if (inputStream != null) {
                 properties.load(inputStream);
             } else {
-                System.err.println("No se encontró el archivo " + propertiesFilePath);
+                log.error("No se encontró el archivo {}", propertiesFilePath);
             }
         } catch (IOException e) {
-            System.err.println("Error cargando las propiedades: " + e.getMessage());
+            log.error("Error cargando las propiedades: {}", e.getMessage());
             return;
         }
 
         // Establecer nuevas propiedades
         properties.setProperty("api.base.url", api1Url);
         properties.setProperty("api2.base.url", api2Url);
-        System.out.println("Propiedades actualizadas con nuevos valores: " + properties.getProperty("api.base.url") + ", " + properties.getProperty("api2.base.url"));
+        log.info("Propiedades actualizadas con nuevos valores: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
 
         MigrateSystem migrateSystem = null;
         try {
@@ -93,21 +95,20 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         }
 
         Scanner src = new Scanner(System.in);
-        System.out.println("Pasa la ubicación de root para limpiar (deja vacío para usar la ruta por defecto): "+odl);
+        log.info("Pasa la ubicación de root para limpiar (deja vacío para usar la ruta por defecto):\n{}", odl);
         String pathroot = src.nextLine();
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
-            System.out.println("Usando la ruta por defecto: " + pathroot);
+            log.info("Usando la ruta por defecto: {}", pathroot);
         }
 
-        System.out.println("Escribe la nueva ubicación de root (deja vacío para usar la ruta por defecto): "+f);
+        log.info("Escribe la nueva ubicación de root (deja vacío para usar la ruta por defecto):\n{}", f);
         String newRoot = src.nextLine();
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
-            System.out.println("Usando la ruta por defecto: " + newRoot);
+            log.info("Usando la ruta por defecto: {}", newRoot);
         }
 
-        log.info("Empezando a migrar todo a esta ubicacion " + pathroot);
         f = new File(newRoot);
         f.mkdirs();
 
@@ -117,7 +118,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        log.info("Modificando a migrar todo de esta ubicación " + pathroot);
+        log.info("Modificando todo de esta ubicación {}", pathroot);
         log.info("Esto llevara un rato...");
 
         File file = new File(pathroot);
@@ -131,25 +132,27 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         log.info("Migración completada.");
 
         WarningUtil.showWarning("ALERTA", "Quieres borrar las carpetas del root antiguo. Si lo borras no lo podrás recuperar más tarde. S/N");
-        String opc = src.next();
         boolean t = false;
         do {
+            String opc = src.next();
             switch (opc) {
                 case ("s"):
                 case ("S"):
                     migrateSystem.borrar(pathroot);
+                    t = false;
                     break;
                 case ("n"):
                 case ("N"):
-                    System.out.println("Terminando el programa");
+                    log.info("Terminando el programa");
+                    t = false;
                     break;
                 default:
-                    System.out.println("Elige una opción S/N");
+                    log.info("Elige una opción S/N");
                     t = true;
                     break;
             }
         } while (t);
-        System.out.println("Programa terminado");
+        log.info("Programa terminado");
     }
 
     /**
