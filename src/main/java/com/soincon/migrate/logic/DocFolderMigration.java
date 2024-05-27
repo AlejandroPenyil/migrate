@@ -2,7 +2,6 @@ package com.soincon.migrate.logic;
 
 import com.soincon.migrate.dto.newDtos.DocumentDto;
 import com.soincon.migrate.retroFit.ImplNew;
-import com.soincon.migrate.retroFit.ImplOld;
 import lombok.Getter;
 import lombok.Setter;
 

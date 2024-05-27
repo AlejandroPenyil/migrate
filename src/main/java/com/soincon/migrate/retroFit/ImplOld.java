@@ -1,9 +1,11 @@
 package com.soincon.migrate.retroFit;
 
+import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.filter.PaginatedList;
+import com.soincon.migrate.iservice.DirectoryService;
 import com.soincon.migrate.iservice.FileService;
 import com.soincon.migrate.iservice.FileTypeService;
 import retrofit2.Call;
@@ -15,10 +17,12 @@ import java.util.List;
 public class ImplOld {
     FileService fileService;
     FileTypeService fileTypeService;
+    DirectoryService directoryService;
 
     public ImplOld() throws IOException {
         fileService = RetroFitClientOld.getInstanceRetrofit().create(FileService.class);
         fileTypeService = RetroFitClientOld.getInstanceRetrofit().create(FileTypeService.class);
+        directoryService = RetroFitClientOld.getInstanceRetrofit().create(DirectoryService.class);
     }
 
     public List<FileTypeDto> getFileTypes() throws IOException {
@@ -39,5 +43,12 @@ public class ImplOld {
         Response<PaginatedList<FileDto>> response = call.execute();
         assert response.body() != null;
         return  response.body().getResults();
+    }
+
+    public List<DirectoryDto> searchDirectoryByFilterAll(FilterDirectory filterDirectory) throws IOException {
+        Call<PaginatedList<DirectoryDto>> call = directoryService.searchDirectoryByFilterAll(filterDirectory);
+        Response<PaginatedList<DirectoryDto>> response = call.execute();
+        assert response.body() != null;
+        return response.body().getResults();
     }
 }

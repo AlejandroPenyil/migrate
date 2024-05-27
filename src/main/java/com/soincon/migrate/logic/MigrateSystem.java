@@ -2,6 +2,7 @@ package com.soincon.migrate.logic;
 
 import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.newDtos.DocumentDto;
+import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
 import com.soincon.migrate.filter.Content;
@@ -13,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
@@ -49,27 +51,41 @@ public class MigrateSystem {
         File file = new File(path);
         if (file.exists()) {
             if (file.isDirectory()) {
-                File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
-                directory.mkdirs();
-                DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
-                if (!docFolderMigration.isExist()) {
-                    DocumentDto documentDto = new DocumentDto();
-                    documentDto.setName(file.getName().toLowerCase());
-                    documentDto.setTypeDoc("FOLDER");
-                    if (documentDto.getIdParent() == null) {
-                        documentDto.setIdParent(docFolderMigration.getIdParent());
-                    }
+                if (folderExist(file)) {
+                    File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
+                    directory.mkdirs();
+                    DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
+                    if (!docFolderMigration.isExist()) {
+                        DocumentDto documentDto = new DocumentDto();
+                        documentDto.setName(file.getName().toLowerCase());
+                        documentDto.setTypeDoc("FOLDER");
+                        if (documentDto.getIdParent() == null) {
+                            documentDto.setIdParent(docFolderMigration.getIdParent());
+                        }
 
-                    documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
-                    for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                        showProgressIndicator(++currentStep, totalFilesAndDirectories);
-                        migrate(subFile.getAbsolutePath(), documentDto, directory);
+                        documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
+                        for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                            showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                            migrate(subFile.getAbsolutePath(), documentDto, directory);
+                        }
+                    } else {
+                        for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                            showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                            migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
+                        }
                     }
-                } else {
-                    for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                        showProgressIndicator(++currentStep, totalFilesAndDirectories);
-                        migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
-                    }
+                }else{
+                    File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
+                    file2.mkdir();
+                    boolean t = true;
+                    int i = 0;
+                    do {
+                        if (file.renameTo(new File(file2 + "\\" + i + file.getName()))) {
+                            t = false;
+                        } else {
+                            i++;
+                        }
+                    } while (t);
                 }
             } else {
                 if (exists(file)) {
@@ -105,7 +121,7 @@ public class MigrateSystem {
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                             fi++;
                             if (documentDto != null) {
-                                createVersion(documentDto, i, fullName);
+                                createVersion(documentDto, i, fullName,file2);
                                 fi--;
                             }
                         }
@@ -126,6 +142,24 @@ public class MigrateSystem {
                 }
             }
         }
+    }
+
+    private boolean folderExist(File file) throws IOException {
+        FilterDirectory filterDirectory = new FilterDirectory();
+        Content content = new Content();
+        content.setExactName(file.getName());
+        filterDirectory.setContent(content);
+
+        List<DirectoryDto> fileDtoList = implOld.searchDirectoryByFilterAll(filterDirectory);
+
+        if (!fileDtoList.isEmpty()) {
+            for (DirectoryDto fileDto : fileDtoList) {
+                if (file.getParentFile().getAbsolutePath().equalsIgnoreCase(fileDto.getPathBase())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -187,7 +221,7 @@ public class MigrateSystem {
      * @param fullName
      * @throws IOException
      */
-    private void createVersion(DocumentDto documentDto, int i, String fullName) throws IOException {
+    private void createVersion(DocumentDto documentDto, int i, String fullName,File file) throws IOException {
         DocumentVersionDto documentVersionDto = new DocumentVersionDto();
         documentVersionDto.setIdVersion(i);
         documentVersionDto.setIdDocument(documentDto.getIdDocument());
@@ -197,7 +231,10 @@ public class MigrateSystem {
         documentVersionDto.setReason("migrate");
         documentVersionDto.setVersionStatus("VALID");
         documentVersionDto.setUploadDate(ZonedDateTime.now().toString());
-        documentVersionDto.setMimeType(getMimeType(fullName));
+        Path path = file.toPath();
+
+        String mimeType = Files.probeContentType(path);
+        documentVersionDto.setMimeType(mimeType);
 
         implNew.documentCreateDto(documentVersionDto);
     }
@@ -365,7 +402,7 @@ public class MigrateSystem {
                             documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
                             if (documentDto1 != null) {
                                 log.info(documentDto.toString());
-                                createVersion(documentDto, i, fullName);
+                                createVersion(documentDto, i, fullName, file2);
                             } else {
                                 log.info(documentDto);
                             }
