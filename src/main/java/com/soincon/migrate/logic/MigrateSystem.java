@@ -32,7 +32,6 @@ public class MigrateSystem {
     ImplNew implNew;
     public static int fi = 0;
     static int currentStep = 1;
-    private Thread stopwatchThread;
     private long startTime = -1;
 
     public MigrateSystem() throws IOException {
@@ -53,10 +52,12 @@ public class MigrateSystem {
         File file = new File(path);
         if (file.exists()) {
             if (file.isDirectory()) {
+                File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
+                DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 if (folderExist(file)) {
-                    File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
+
                     directory.mkdirs();
-                    DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
+
                     if (!docFolderMigration.isExist()) {
                         DocumentDto documentDto = new DocumentDto();
                         documentDto.setName(file.getName().toLowerCase());
@@ -89,6 +90,10 @@ public class MigrateSystem {
                             i++;
                         }
                     } while (t);
+                    for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                        showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                        migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
+                    }
                 }
             } else {
                 if (exists(file)) {
@@ -176,11 +181,23 @@ public class MigrateSystem {
      * @param totalSteps
      */
     private void showProgressIndicator(int currentStep, int totalSteps) {
+        // Obtener el tiempo de inicio solo la primera vez que se llama al método
+        if (startTime == -1) {
+            startTime = System.currentTimeMillis();
+        }
+
         int progressBarLength = 85; // Longitud total de la barra de progreso
         double completedBlocks = (double) currentStep * progressBarLength / totalSteps;
         int remainingBlocks = progressBarLength - (int) completedBlocks;
 
         int percentage = (int) (currentStep * 100.0 / totalSteps); // División como punto flotante
+
+        // Calcular el tiempo transcurrido
+        long elapsedTimeMillis = System.currentTimeMillis() - startTime;
+        long elapsedTimeSeconds = elapsedTimeMillis / 1000;
+        long hours = elapsedTimeSeconds / 3600;
+        long minutes = (elapsedTimeSeconds % 3600) / 60;
+        long seconds = elapsedTimeSeconds % 60;
 
         StringBuilder progressBar = new StringBuilder("[");
         for (int i = 0; i < (int) completedBlocks; i++) {
@@ -190,6 +207,13 @@ public class MigrateSystem {
             progressBar.append("\u2591"); // Carácter Unicode para un bloque vacío
         }
         progressBar.append("] ").append(percentage).append("%");
+
+        // Añadir el cronómetro
+        progressBar.append(" [");
+        if (hours > 0) {
+            progressBar.append(String.format("%02d:", hours));
+        }
+        progressBar.append(String.format("%02d:%02d]", minutes, seconds));
 
         // Imprimir la barra de progreso
         System.out.print("\r" + progressBar.toString());
