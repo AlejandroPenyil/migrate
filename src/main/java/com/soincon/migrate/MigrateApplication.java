@@ -14,8 +14,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
-import static com.soincon.migrate.logic.MigrateSystem.currentStep;
-
 /**
  * Introducir como variables:
  * Api nueva, api antigua
@@ -82,7 +80,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         properties.setProperty("api2.base.url", api2Url);
         log.info("Properties updated with new values: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
 
-        MigrateSystem migrateSystem = null;
+        MigrateSystem migrateSystem;
         try {
             migrateSystem = new MigrateSystem();
         } catch (IOException e) {
@@ -151,7 +149,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         WarningUtil.showWarning("ALERT", "Do you want to delete the folders from the old root? If you delete them, you will not be able to recover them later. Y/N");
 
-        boolean t = false;
+        boolean t;
         do {
             String opc = src.next();
             switch (opc) {
@@ -163,7 +161,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     switch (opc) {
                         case ("y"):
                         case ("Y"):
-                            t = false;
                             log.info("Deleting the entire old directory structure");
                             migrateSystem.borrar(pathroot);
                             break;
@@ -191,8 +188,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
      * metodo que cuenta la cantidad de fichero y directorios de manera recursiva para
      * que funcione el progressbar
      *
-     * @param file
-     * @return
+     * @param file ubicacion en la que contar ficheros y directorios
+     * @return numero de ficheros y directorios
      */
     private int countFilesAndDirectories(File file) {
         int count = 0;
@@ -208,7 +205,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 /*
         if (args.length >= 2) {
             System.out.print("---------------------------------" +

@@ -44,16 +44,13 @@ public class ProgressIndicator implements Runnable {
         long minutes = (elapsedTimeSeconds % 3600) / 60;
         long seconds = elapsedTimeSeconds % 60;
 
-        StringBuilder progressBar = new StringBuilder("");
-        progressBar.append("\u2588".repeat(Math.max(0, (int) completedBlocks)));
-        progressBar.append(" ".repeat(Math.max(0, remainingBlocks)));
-        progressBar.append(" ").append(percentage).append("%");
+        String progressBar = "█".repeat(Math.max(0, (int) completedBlocks)) +
+                " ".repeat(Math.max(0, remainingBlocks)) +
+                " " + percentage + "%" +
+                " [" +
+                String.format("%02d:%02d:%02d]", hours, minutes, seconds);
 
-        progressBar.append(" [");
-
-        progressBar.append(String.format("%02d:%02d:%02d]",hours , minutes, seconds));
-
-        System.out.print("\r" + progressBar.toString());
+        System.out.print("\r" + progressBar);
     }
 }
 

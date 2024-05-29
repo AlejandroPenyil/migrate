@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.soincon.migrate.MigrateApplication.f;
-import static com.soincon.migrate.MigrateApplication.totalFilesAndDirectories;
 import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
 
 @Log4j2
@@ -219,8 +218,7 @@ public class MigrateSystem {
         documentVersionDto.setIdVersion(i);
         documentVersionDto.setIdDocument(documentDto.getIdDocument());
         documentVersionDto.setExternalCode(fullName);
-        obtenerToken();
-        documentVersionDto.setIdUser(114);
+        documentVersionDto.setIdUser(obtenerToken());
         documentVersionDto.setReason("migrate");
         documentVersionDto.setVersionStatus("VALID");
         documentVersionDto.setUploadDate(ZonedDateTime.now().toString());
@@ -238,65 +236,63 @@ public class MigrateSystem {
      * @return the id of the user
      */
     private Integer obtenerToken() {
-        Integer idUser = 1;
+        int idUser = 1;
 
         String[] chunks = Jwtoken.getToken().split("\\.");
 
         Base64.Decoder decoder = Base64.getUrlDecoder();
 
-        String header = new String(decoder.decode(chunks[0]));
         String payload = new String(decoder.decode(chunks[1]));
-        String signature = new String(decoder.decode(chunks[2]));
 
         String[] code = payload.split(",");
 
         for (String s : code) {
             if (s.contains("userId")) {
                 String[] id = s.split(":");
-                idUser = Integer.valueOf(id[1]);
+                idUser = Integer.parseInt(id[1]);
             }
         }
 
         return idUser;
     }
 
-    /**
-     * Metodo para obtener el mimeType de un fichero
-     *
-     * @param fullName
-     * @return
-     * @throws IOException
-     */
-    private String getMimeType(String fullName) throws IOException {
-        List<FileTypeDto> fileTypeDtos = implOld.getFileTypes();
-        for (FileTypeDto fileTypeDto : fileTypeDtos) {
-            File file = new File(fullName);
-            int lastIndex = file.getName().lastIndexOf('.');
-            if (lastIndex != -1) {
-                fullName = file.getName().substring(lastIndex, fullName.length());
-            }
-            if (fileTypeDto.getExtension().equals(fullName)) {
-                lastIndex = fileTypeDto.getMimeType().lastIndexOf('/');
-                if (lastIndex != -1) {
-                    fullName = fileTypeDto.getMimeType().substring(0, lastIndex) + "/" + fileTypeDto.getName();
-                }
-                return fullName;
-
-            } else if (fullName.equals(".jpeg")) {
-                if (fileTypeDto.getExtension().equals(".jpg")) {
-                    return fileTypeDto.getMimeType();
-                }
-            }
-        }
-        return "";
-    }
+//    /**
+//     * Metodo para obtener el mimeType de un fichero
+//     *
+//     * @param fullName nombre completo del fichero
+//     * @return el mimetype
+//     * @throws IOException si ocurre algo con los ficheros
+//     */
+//    private String getMimeType(String fullName) throws IOException {
+//        List<FileTypeDto> fileTypeDtos = implOld.getFileTypes();
+//        for (FileTypeDto fileTypeDto : fileTypeDtos) {
+//            File file = new File(fullName);
+//            int lastIndex = file.getName().lastIndexOf('.');
+//            if (lastIndex != -1) {
+//                fullName = file.getName().substring(lastIndex, fullName.length());
+//            }
+//            if (fileTypeDto.getExtension().equals(fullName)) {
+//                lastIndex = fileTypeDto.getMimeType().lastIndexOf('/');
+//                if (lastIndex != -1) {
+//                    fullName = fileTypeDto.getMimeType().substring(0, lastIndex) + "/" + fileTypeDto.getName();
+//                }
+//                return fullName;
+//
+//            } else if (fullName.equals(".jpeg")) {
+//                if (fileTypeDto.getExtension().equals(".jpg")) {
+//                    return fileTypeDto.getMimeType();
+//                }
+//            }
+//        }
+//        return "";
+//    }
 
     /**
      * Metodo que le pone una extension a un fichero si este no tiene una
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file the file without extension
+     * @return file with extension
+     * @throws IOException Returns an error if there is any issue with the file.
      */
     private File asignarExtension(File file) throws IOException {
         FilterDirectory filterDirectory = new FilterDirectory();
@@ -323,8 +319,8 @@ public class MigrateSystem {
     /**
      * Metodo que sirve para obtener el nombre de un fichero sin su extension
      *
-     * @param file
-     * @return
+     * @param file file with extension
+     * @return name of the file without extension
      */
     private String quitarExtension(File file) {
         String fileName = "";
@@ -344,7 +340,7 @@ public class MigrateSystem {
      *
      * @param pathroot Ubicacion root antigua
      * @param newRoot  Nueva ubicacion de root
-     * @throws IOException
+     * @throws IOException Returns an error if there is any issue with the file.
      */
     public void cleanRoot(String pathroot, String newRoot) throws IOException {
 
@@ -441,7 +437,6 @@ public class MigrateSystem {
                         file.mkdir();
                     } else {
                         file2.mkdir();
-                        boolean tr = false;
 
                         file2 = new File(file2 + "\\" + file.getName());
                         if (file2.mkdir()) {
@@ -450,7 +445,7 @@ public class MigrateSystem {
                             documentDto1.setTypeDoc("FOLDER");
                             documentDto1.setName(file.getName());
                             documentDto1.setIdParent(documentDto.getIdParent());
-                            documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
+                            implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
                         }
                     }
                 }
@@ -461,9 +456,9 @@ public class MigrateSystem {
     /**
      * metodo que crea un documento nuevo en la nueva base de datos
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file carpeta que se quiere crear en la base de datos
+     * @return el nuevo documento creado
+     * @throws IOException si ocurre algo con loos ficheros
      */
     private DocumentDto createNew(File file) throws IOException {
         DocumentDto documentDto = new DocumentDto();
@@ -475,7 +470,7 @@ public class MigrateSystem {
     /**
      * metodo que borra el arbol de directorios antiguo
      *
-     * @param path
+     * @param path ubicacion que se va a borrar
      */
     public void borrar(String path) {
         File file = new File(path);
