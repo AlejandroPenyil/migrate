@@ -32,8 +32,8 @@ public class MigrateSystem {
     ImplOld implOld;
     ImplNew implNew;
     public static int fi = 0;
-    static int currentStep = 1;
-    private long startTime = -1;
+    public static int currentStep = 1;
+    private static long startTime = -1;
 
     public MigrateSystem() throws IOException {
         this.implNew = new ImplNew();
@@ -43,11 +43,11 @@ public class MigrateSystem {
     /**
      * metodo que implica toda la logica para la migracion de ficheros y carpetas
      *
-     * @param path
-     * @param parent
-     * @param newPath
-     * @throws IOException
-     * @throws InterruptedException
+     * @param path path of the old root
+     * @param parent dto with the information from the parent of the current file
+     * @param newPath path of the new root
+     * @throws IOException an exception by a possible error with the files
+     * @throws InterruptedException an exception throw by the thread of the progress bar
      */
     public void migrate(String path, DocumentDto parent, File newPath) throws IOException, InterruptedException {
         File file = new File(path);
@@ -68,12 +68,12 @@ public class MigrateSystem {
 
                     documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                        showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                        ++currentStep;
                         migrate(subFile.getAbsolutePath(), documentDto, directory);
                     }
                 } else {
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                        showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                        ++currentStep;
                         migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
                     }
                 }
@@ -91,7 +91,7 @@ public class MigrateSystem {
                     }
                 } while (t);
                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                    showProgressIndicator(++currentStep, totalFilesAndDirectories);
+                    ++currentStep;
                     migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
                 }
             }
@@ -182,56 +182,11 @@ public class MigrateSystem {
     }
 
     /**
-     * Metodo que pinta la barra de progreso
+     * Method that checks if a file exists in the old database.
      *
-     * @param currentStep
-     * @param totalSteps
-     */
-    private void showProgressIndicator(int currentStep, int totalSteps) {
-        // Obtener el tiempo de inicio solo la primera vez que se llama al método
-        if (startTime == -1) {
-            startTime = System.currentTimeMillis();
-        }
-
-        int progressBarLength = 85; // Longitud total de la barra de progreso
-        double completedBlocks = (double) currentStep * progressBarLength / totalSteps;
-        int remainingBlocks = progressBarLength - (int) completedBlocks;
-
-        int percentage = (int) (currentStep * 100.0 / totalSteps); // División como punto flotante
-
-        // Calcular el tiempo transcurrido
-        long elapsedTimeMillis = System.currentTimeMillis() - startTime;
-        long elapsedTimeSeconds = elapsedTimeMillis / 1000;
-        long hours = elapsedTimeSeconds / 3600;
-        long minutes = (elapsedTimeSeconds % 3600) / 60;
-        long seconds = elapsedTimeSeconds % 60;
-
-        StringBuilder progressBar = new StringBuilder("[");
-        for (int i = 0; i < (int) completedBlocks; i++) {
-            progressBar.append("\u2588"); // Carácter Unicode para un bloque lleno
-        }
-        for (int i = 0; i < remainingBlocks; i++) {
-            progressBar.append("\u2591"); // Carácter Unicode para un bloque vacío
-        }
-        progressBar.append("] ").append(percentage).append("%");
-
-        // Añadir el cronómetro
-        progressBar.append(" [");
-        if (hours > 0) {
-            progressBar.append(String.format("%02d:", hours));
-        }
-        progressBar.append(String.format("%02d:%02d]", minutes, seconds));
-
-        // Imprimir la barra de progreso
-        System.out.print("\r" + progressBar.toString());
-    }
-
-    /**
-     * Metodo que comprueba si un fichero existe en la base de datos antigua
-     *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file The file you are checking for existence.
+     * @return True if it exists, false otherwise.
+     * @throws IOException Returns an error if there is any issue with the file.
      */
     private boolean exists(File file) throws IOException {
         FilterDirectory filterDirectory = new FilterDirectory();
@@ -252,12 +207,12 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo para crear el documentVersion en la nueva base de datos
+     * Method to create the documentVersion in the new database.
      *
-     * @param documentDto
-     * @param i
-     * @param fullName
-     * @throws IOException
+     * @param documentDto The document for which a version will be registered.
+     * @param i The number of the version.
+     * @param fullName The full name.
+     * @throws IOException Returns an error if there is any issue with the file.
      */
     private void createVersion(DocumentDto documentDto, int i, String fullName, File file) throws IOException {
         DocumentVersionDto documentVersionDto = new DocumentVersionDto();
@@ -280,7 +235,7 @@ public class MigrateSystem {
     /**
      * metodo que obtiene el id de usuario con el tokem
      *
-     * @return
+     * @return the id of the user
      */
     private Integer obtenerToken() {
         Integer idUser = 1;

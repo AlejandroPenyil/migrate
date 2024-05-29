@@ -1,5 +1,6 @@
 package com.soincon.migrate;
 
+import com.soincon.migrate.logic.ProgressIndicator;
 import lombok.extern.log4j.Log4j2;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
@@ -12,6 +13,8 @@ import java.io.*;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
+
+import static com.soincon.migrate.logic.MigrateSystem.currentStep;
 
 /**
  * Introducir como variables:
@@ -135,7 +138,11 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
         try {
+            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+            Thread progressThread = new Thread(progressIndicator);
+            progressThread.start();
             migrateSystem.migrate(pathroot, null, f);
+            progressIndicator.stop();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
