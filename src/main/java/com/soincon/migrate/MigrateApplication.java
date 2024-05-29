@@ -1,10 +1,8 @@
 package com.soincon.migrate;
 
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -58,7 +56,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
      */
     @Override
     public void run() {
-        WarningUtil.showWarning("IMPORTANTE", "Este programa hará cambios en el sistema de archivos y no se podrán recuperar");
+        WarningUtil.showWarning("IMPORTANT", "This program will make changes to the file system and they cannot be undone.");
+
 
         Properties properties = new Properties();
         String propertiesFilePath = "application.properties";
@@ -68,17 +67,17 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             if (inputStream != null) {
                 properties.load(inputStream);
             } else {
-                log.error("No se encontró el archivo {}", propertiesFilePath);
+                log.error("File not found: {}", propertiesFilePath);
             }
         } catch (IOException e) {
-            log.error("Error cargando las propiedades: {}", e.getMessage());
+            log.error("Error loading properties: {}", e.getMessage());
             return;
         }
 
         // Establecer nuevas propiedades
         properties.setProperty("api.base.url", api1Url);
         properties.setProperty("api2.base.url", api2Url);
-        log.info("Propiedades actualizadas con nuevos valores: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
+        log.info("Properties updated with new values: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
 
         MigrateSystem migrateSystem = null;
         try {
@@ -89,25 +88,37 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         // Guardar las propiedades en el archivo
         try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
-            properties.store(propertiesOutputStream, "Actualizada la base de datos");
+            properties.store(propertiesOutputStream, "Database updated");
         } catch (IOException e) {
-            System.err.println("Error guardando las propiedades: " + e.getMessage());
+            System.err.println("Error saving properties: " + e.getMessage());
         }
 
         Scanner src = new Scanner(System.in);
-        log.info("Pasa la ubicación de root para limpiar (deja vacío para usar la ruta por defecto):\n{}", odl);
+        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
         String pathroot = src.nextLine();
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
-            log.info("Usando la ruta por defecto: {}", pathroot);
+            log.info("Using the default path: {}", pathroot);
         }
 
-        log.info("Escribe la nueva ubicación de root (deja vacío para usar la ruta por defecto):\n{}", f);
+
+        File root = new File(pathroot);
+        if(!root.exists()){
+            try {
+                throw new FileNotFoundException();
+            } catch (FileNotFoundException e) {
+                log.error("The old root location was not found");
+                return;
+            }
+        }
+
+        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
         String newRoot = src.nextLine();
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
-            log.info("Usando la ruta por defecto: {}", newRoot);
+            log.info("Using the default path: {}", newRoot);
         }
+
 
         f = new File(newRoot);
         f.mkdirs();
@@ -118,8 +129,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        log.info("Modificando todo de esta ubicación {}", pathroot);
-        log.info("Esto llevara un rato...");
+        log.info("Modifying everything in this location: {}", pathroot);
+        log.info("This will take a while...");
 
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
@@ -129,35 +140,50 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
         System.out.println();
-        log.info("Migración completada.");
+        log.info("Migration completed.");
 
-        WarningUtil.showWarning("ALERTA", "Quieres borrar las carpetas del root antiguo. Si lo borras no lo podrás recuperar más tarde. S/N");
+        WarningUtil.showWarning("ALERT", "Do you want to delete the folders from the old root? If you delete them, you will not be able to recover them later. Y/N");
+
         boolean t = false;
         do {
             String opc = src.next();
             switch (opc) {
-                case ("s"):
-                case ("S"):
-                    migrateSystem.borrar(pathroot);
+                case ("y"):
+                case ("Y"):
+                    log.info("Are you sure? y/n");
+                    src.nextLine();
+                    opc = src.next();
+                    switch (opc) {
+                        case ("y"):
+                        case ("Y"):
+                            t = false;
+                            log.info("Deleting the entire old directory structure");
+                            migrateSystem.borrar(pathroot);
+                            break;
+                        default:
+                            break;
+                    }
                     t = false;
                     break;
                 case ("n"):
                 case ("N"):
-                    log.info("Terminando el programa");
+                    log.info("Ending the program");
                     t = false;
                     break;
                 default:
-                    log.info("Elige una opción S/N");
+                    log.info("Choose an option Y/N");
                     t = true;
                     break;
             }
         } while (t);
-        log.info("Programa terminado");
+        log.info("Program ended");
+
     }
 
     /**
      * metodo que cuenta la cantidad de fichero y directorios de manera recursiva para
      * que funcione el progressbar
+     *
      * @param file
      * @return
      */
