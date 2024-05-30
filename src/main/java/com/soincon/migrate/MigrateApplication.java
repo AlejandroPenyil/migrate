@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
@@ -75,10 +76,12 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             return;
         }
 
-        // Establecer nuevas propiedades
-        properties.setProperty("api.base.url", api1Url);
-        properties.setProperty("api2.base.url", api2Url);
-        log.info("Properties updated with new values: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
+        System.setProperty("api.base.url", api1Url);
+        System.setProperty("api2.base.url", api2Url);
+//        // Establecer nuevas propiedades
+//        properties.setProperty("api.base.url", api1Url);
+//        properties.setProperty("api2.base.url", api2Url);
+//        log.info("Properties updated with new values: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
 
         MigrateSystem migrateSystem;
         try {
@@ -95,7 +98,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         }
 
         Scanner src = new Scanner(System.in);
-        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
+        WarningUtil.showWarning("IMPORTANT", "Enter the root location to clean (leave empty to use the" +
+                " default path):\n" + odl);
+//        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
         String pathroot = src.nextLine();
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
@@ -113,7 +118,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             }
         }
 
-        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
+        WarningUtil.showWarning("IMPORTANT", "Enter the new root location (leave empty to use the default path):\n" + f);
+//        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
         String newRoot = src.nextLine();
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();

@@ -20,8 +20,9 @@ public class RetroFitNew {
         prop.load(in);
         in.close();
 
-        baseUrl = prop.getProperty("api2.base.url");
+//        baseUrl = prop.getProperty("api2.base.url");
 
+        baseUrl = System.getProperty("api2.base.url");
         if (retrofit == null){
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
                     .readTimeout(600, TimeUnit.SECONDS)

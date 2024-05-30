@@ -18,7 +18,8 @@ public class RetroFitClientOld {
         prop.load(in);
         in.close();
 
-        String baseUrl = prop.getProperty("api.base.url");
+//        String baseUrl = prop.getProperty("api.base.url");
+            String baseUrl=System.getProperty("api.base.url");
 
         if (retrofit == null){
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(600, TimeUnit.SECONDS);

@@ -9,6 +9,7 @@ import com.soincon.migrate.filter.Content;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
+import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -128,7 +129,7 @@ public class MigrateSystem {
                             DocumentDto documentDto = new DocumentDto();
                             documentDto.setName(name.toLowerCase());
                             documentDto.setTypeDoc("DOC");
-                            documentDto.setIdParent(docFolderMigration.getDocumentDto().getIdParent());
+                            documentDto.setIdParent(docFolderMigration.getDocumentDto().getIdDocument());
 
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                             fi++;
@@ -143,14 +144,18 @@ public class MigrateSystem {
                     } while (!tr);
                 }
             } else {
-                File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
-                file2.mkdir();
+                File directry = Paths.get(String.valueOf(f), "notfound").toFile();
+                directry.mkdir();
                 boolean t = true;
                 int i = 0;
                 do {
-                    file2 = new File(file2 + "\\" + i + file.getName());
+                    File file2 = new File(directry + "\\" + i + file.getName());
                     if (!file2.exists()) {
-                        FileUtils.copyFile(file, file2);
+                        try {
+                            FileUtils.copyFile(file, file2);
+                        }catch (IOException exception){
+                            log.error("Cannot create {}",file2);
+                        }
                         if (file2.exists()) {
                             t = false;
                         }
@@ -419,7 +424,7 @@ public class MigrateSystem {
                                     DocumentDto documentDto1 = new DocumentDto();
                                     documentDto1.setTypeDoc("DOC");
                                     documentDto1.setName(file.getName());
-                                    documentDto1.setIdParent(documentDto.getIdParent());
+                                    documentDto1.setIdParent(documentDto.getIdDocument());
                                     documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
                                     if (documentDto1 != null) {
                                         createVersion(documentDto, i, fullName, file2);
