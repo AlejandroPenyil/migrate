@@ -8,6 +8,6 @@ import retrofit2.http.GET;
 import java.util.List;
 
 public interface FileTypeService {
-    @GET("/file-types")
+    @GET("file-types")
     Call<List<FileTypeDto>> getFileTypes();
 }

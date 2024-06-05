@@ -132,7 +132,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         try {
             migrateSystem.cleanRoot(pathroot, newRoot);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -147,7 +147,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             progressThread.start();
             migrateSystem.migrate(pathroot, null, f);
             progressIndicator.stop();
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         System.out.println();

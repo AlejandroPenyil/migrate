@@ -10,7 +10,7 @@ public interface IDocumentService {
     @GET("document/findRootDocuments")
     Call<List<DocumentDto>> findRootDocuments();
 
-    @POST("document/{pathbase}")
+    @POST("document/pathbase")
     Call<DocumentDto> createDocument(@Query("pathbase") String path, @Body DocumentDto documentDto);
 
     @GET("document/search")

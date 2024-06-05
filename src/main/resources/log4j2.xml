@@ -8,7 +8,7 @@
         </Console>
 
         <!-- Appender para el archivo de registro -->
-        <File name="File" fileName="C:/Users/apenil/IdeaProjects/migrate/migrate/src/main/resources/logs/log.log">
+        <File name="File" fileName="log/log.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
             <Charset>UTF-8</Charset> <!-- Especificar la codificación UTF-8 -->
         </File>

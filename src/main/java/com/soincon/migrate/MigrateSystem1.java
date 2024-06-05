@@ -1,15 +1,15 @@
-package com.soincon.migrate.logic;
+package com.soincon.migrate;
 
-import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.newDtos.DocumentDto;
+import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
 import com.soincon.migrate.filter.Content;
 import com.soincon.migrate.filter.FilterDirectory;
+import com.soincon.migrate.logic.DocFolderMigration;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
-import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -28,14 +28,14 @@ import static com.soincon.migrate.MigrateApplication.f;
 import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
 
 @Log4j2
-public class MigrateSystem {
+public class MigrateSystem1 {
     ImplOld implOld;
     ImplNew implNew;
     public static int fi = 0;
     public static int currentStep = 1;
     private static long startTime = -1;
 
-    public MigrateSystem() throws IOException {
+    public MigrateSystem1() throws IOException {
         this.implNew = new ImplNew();
         this.implOld = new ImplOld();
     }
@@ -49,11 +49,10 @@ public class MigrateSystem {
      * @throws IOException          an exception by a possible error with the files
      * @throws InterruptedException an exception throw by the thread of the progress bar
      */
-    public void migrate(String path, DocumentDto parent, File newPath) throws Exception {
+    public void migrate(String path, DocumentDto parent, File newPath) throws IOException, InterruptedException {
         File file = new File(path);
         if (file.isDirectory()) {
-            String name = refactorName(file.getName());
-            File directory = Paths.get(String.valueOf(newPath), name).toFile();
+            File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
             DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
             if (folderExist(file)) {
 
@@ -61,13 +60,12 @@ public class MigrateSystem {
 
                 if (!docFolderMigration.isExist()) {
                     DocumentDto documentDto = new DocumentDto();
-                    documentDto.setName(name);
+                    documentDto.setName(file.getName().toLowerCase());
                     documentDto.setTypeDoc("FOLDER");
                     if (documentDto.getIdParent() == null) {
                         documentDto.setIdParent(docFolderMigration.getIdParent());
                     }
 
-                    documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
                         ++currentStep;
                         migrate(subFile.getAbsolutePath(), documentDto, directory);
@@ -84,7 +82,7 @@ public class MigrateSystem {
                 boolean t = true;
                 int i = 0;
                 do {
-                    file2 = new File(file2 + "\\" + i + name);
+                    file2 = new File(file2 + "\\" + i + file.getName());
                     if (file2.mkdir()) {
                         t = false;
                     } else {
@@ -122,57 +120,12 @@ public class MigrateSystem {
                     }
 
                     String name = quitarExtension(directory);
-                    do {
-                        String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                        File file2 = new File(directory.getParentFile().getPath() + "\\" + fullName);
-                        if (directory.renameTo(file2)) {
-                            tr = true;
-                            DocumentDto documentDto = new DocumentDto();
-                            documentDto.setName(name.toLowerCase());
-                            documentDto.setTypeDoc("DOC");
-                            documentDto.setIdParent(docFolderMigration.getDocumentDto().getIdDocument());
 
-                            documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
-                            fi++;
-                            if (documentDto != null) {
-                                createVersion(documentDto, i, fullName, file2);
-                                fi--;
-                            } else {
-                                log.info("You need to check this: {}", file);
-                            }
-                        }
-                        i++;
-                    } while (!tr);
                 }
             } else {
-                File directry = Paths.get(String.valueOf(f), "notfound").toFile();
-                directry.mkdir();
-                boolean t = true;
-                int i = 0;
-                do {
-                    File file2 = new File(directry + "\\" + i + file.getName());
-                    if (!file2.exists()) {
-                        try {
-                            FileUtils.copyFile(file, file2);
-                        } catch (IOException exception) {
-                            log.error("Cannot create {}", file2);
-                        }
-                        if (file2.exists()) {
-                            t = false;
-                        }
-                    }
-                    i++;
-                } while (t);
 
             }
         }
-    }
-
-    private String refactorName(String name) {
-        name = name.toLowerCase();
-        name = name.replace("-"," ");
-        name = name.replace("_"," ");
-        return name;
     }
 
     private boolean folderExist(File file) throws IOException {
@@ -227,20 +180,7 @@ public class MigrateSystem {
      * @throws IOException Returns an error if there is any issue with the file.
      */
     private void createVersion(DocumentDto documentDto, int i, String fullName, File file) throws IOException {
-        DocumentVersionDto documentVersionDto = new DocumentVersionDto();
-        documentVersionDto.setIdVersion(i);
-        documentVersionDto.setIdDocument(documentDto.getIdDocument());
-        documentVersionDto.setExternalCode(fullName);
-        documentVersionDto.setIdUser(obtenerToken());
-        documentVersionDto.setReason("migrate");
-        documentVersionDto.setVersionStatus("VALID");
-        documentVersionDto.setUploadDate(ZonedDateTime.now().toString());
-        Path path = file.toPath();
 
-        String mimeType = Files.probeContentType(path);
-        documentVersionDto.setMimeType(mimeType);
-
-        implNew.documentCreateDto(documentVersionDto);
     }
 
     /**
@@ -355,117 +295,7 @@ public class MigrateSystem {
      * @param newRoot  Nueva ubicacion de root
      * @throws IOException Returns an error if there is any issue with the file.
      */
-    public void cleanRoot(String pathroot, String newRoot) throws Exception {
-
-        Path path = Paths.get(pathroot);
-        File directory = path.toFile();
-
-        File newDirectory = new File(newRoot);
-        path = Paths.get(String.valueOf(newDirectory), "folderRootNew");
-        File file2 = path.toFile();
-
-        File[] files = directory.listFiles(File::isFile);
-
-        if (files != null) {
-            if (files.length != 0) {
-                DocumentDto documentDto = createNew(file2);
-                for (File file : files) {
-                    if (file.isFile()) {
-                        if (!exists(file)) {
-                            path = Paths.get(String.valueOf(f), "notFound");
-                            file2 = path.toFile();
-                            file2.mkdirs();
-                            file2 = new File(file2 + "\\" + file.getName());
-                            if (!file2.exists()) {
-                                FileUtils.copyFile(file, file2);
-                            } else {
-                                int i = 1;
-                                boolean tr = false;
-
-                                String extension = FilenameUtils.getExtension(file.getAbsolutePath());
-
-                                if (extension.isEmpty()) {
-                                    File file3 = asignarExtension(directory);
-                                    if (file.renameTo(file3)) {
-                                        file = file3;
-                                    }
-                                    extension = FilenameUtils.getExtension(file.getAbsolutePath());
-
-                                }
-                                String name = quitarExtension(directory);
-                                do {
-                                    String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                                    file2 = new File(file2 + "\\" + fullName);
-                                    if (!file2.exists()) {
-                                        FileUtils.copyFile(directory, file2);
-                                        if (file2.exists()) {
-                                            tr = true;
-                                        }
-                                    }
-                                    i++;
-                                } while (!tr);
-                            }
-                        } else {
-                            file2.mkdir();
-                            int i = 1;
-                            boolean tr = false;
-
-                            String extension = FilenameUtils.getExtension(file.getAbsolutePath());
-
-                            if (extension.isEmpty()) {
-                                File file3 = asignarExtension(directory);
-                                if (file.renameTo(file3)) {
-                                    file = file3;
-                                }
-                                extension = FilenameUtils.getExtension(file.getAbsolutePath());
-
-                            }
-
-                            String name = quitarExtension(directory);
-                            do {
-                                String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                                file2 = new File(file2 + "\\" + fullName);
-                                if (!file2.exists()) {
-                                    FileUtils.copyFile(directory, file2);
-                                    if (file2.exists()) {
-                                        tr = true;
-                                        DocumentDto documentDto1 = new DocumentDto();
-                                        documentDto1.setTypeDoc("DOC");
-                                        documentDto1.setName(file.getName());
-                                        documentDto1.setIdParent(documentDto.getIdDocument());
-                                        documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
-                                        if (documentDto1 != null) {
-                                            createVersion(documentDto, i, fullName, file2);
-                                        }
-                                    }
-                                }
-                            } while (!tr);
-
-                        }
-                    } else {
-                        if (!exists(file)) {
-                            path = Paths.get(String.valueOf(f), "notFound");
-                            file2 = path.toFile();
-                            file2.mkdirs();
-                            file = new File(file2 + "\\" + file.getName());
-                            file.mkdir();
-                        } else {
-                            file2.mkdir();
-
-                            file2 = new File(file2 + "\\" + file.getName());
-                            if (file2.mkdir()) {
-
-                                DocumentDto documentDto1 = new DocumentDto();
-                                documentDto1.setTypeDoc("FOLDER");
-                                documentDto1.setName(file.getName());
-                                documentDto1.setIdParent(documentDto.getIdParent());
-                                implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    public void cleanRoot(String pathroot, String newRoot) throws IOException {
     }
 
     /**
@@ -475,11 +305,8 @@ public class MigrateSystem {
      * @return el nuevo documento creado
      * @throws IOException si ocurre algo con loos ficheros
      */
-    private DocumentDto createNew(File file) throws Exception {
-        DocumentDto documentDto = new DocumentDto();
-        documentDto.setName(file.getName());
-        documentDto.setTypeDoc("FOLDER");
-        return implNew.createDocument(documentDto, file.getParentFile().getAbsolutePath());
+    private void createNew(File file) throws IOException {
+
     }
 
     /**
@@ -488,12 +315,7 @@ public class MigrateSystem {
      * @param path ubicacion que se va a borrar
      */
     public void borrar(String path) {
-        File file = new File(path);
-        if (file.listFiles() != null) {
-            for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                borrar(subFile.getPath());
-            }
-        }
-        file.delete();
+
     }
+
 }

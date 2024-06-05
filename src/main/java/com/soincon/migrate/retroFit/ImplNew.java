@@ -7,12 +7,14 @@ import com.soincon.migrate.iservice.IDocumentService;
 import com.soincon.migrate.iservice.IDocumentVersionService;
 import com.soincon.migrate.security.AutentecationUser;
 import com.soincon.migrate.security.Token;
+import lombok.extern.log4j.Log4j2;
 import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.List;
 
+@Log4j2
 public class ImplNew {
     IDocumentService iDocumentService;
     IDocumentVersionService iDocumentVersionService;
@@ -37,14 +39,14 @@ public class ImplNew {
         return response.body();
     }
 
-    public DocumentDto createDocument(DocumentDto document, String path) throws IOException {
+    public DocumentDto createDocument(DocumentDto document, String path) throws Exception {
         Call<DocumentDto> call = iDocumentService.createDocument(path, document);
         Response<DocumentDto> response = call.execute();
         return response.body();
     }
 
     public List<DocumentDto> search(DocumentDto documentDto) throws IOException {
-        Call<List<DocumentDto>> call = iDocumentService.searchDocument(documentDto.getName(), documentDto.getTypeDoc(),documentDto.getIdParent(), documentDto.getIdDocument());
+        Call<List<DocumentDto>> call = iDocumentService.searchDocument(documentDto.getName(), documentDto.getTypeDoc(), documentDto.getIdParent(), documentDto.getIdDocument());
         Response<List<DocumentDto>> response = call.execute();
         assert response.body() != null;
         return response.body();
