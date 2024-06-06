@@ -9,9 +9,9 @@ import retrofit2.http.*;
 import java.util.List;
 
 public interface DirectoryService {
-//    @GET("/directories/{id}")
-//    Call<DirectoryDto> getDirectories(@Path("id") String id);
-//
+    @GET("/directories/{id}")
+    Call<DirectoryDto> getDirectories(@Path("id") String id);
+
 //    @GET("/directories")
 //    Call<List<DirectoryDto>> findDirectories();
 //

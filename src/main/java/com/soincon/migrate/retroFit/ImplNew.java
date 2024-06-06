@@ -11,7 +11,9 @@ import lombok.extern.log4j.Log4j2;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Log4j2
@@ -61,6 +63,32 @@ public class ImplNew {
     public DocumentVersionDto documentCreateDto(DocumentVersionDto documentCreateDto) throws IOException {
         Call<DocumentVersionDto> call = iDocumentVersionService.createDocument(documentCreateDto);
         Response<DocumentVersionDto> response = call.execute();
+        return response.body();
+    }
+
+    public DocumentDto updateDocument(DocumentDto documentDto) throws IOException {
+        Call<DocumentDto> call = iDocumentService.updateDocument(documentDto.getIdDocument(), documentDto);
+        Response<DocumentDto> response = call.execute();
+        return response.body();
+    }
+
+    public List<DocumentDto> searchByPath(File f) throws IOException {
+        String path = f.getAbsolutePath().replace("\\","/");
+        Call<List<DocumentDto>> call = iDocumentService.searchByPathBase(path, null, false);
+        Response<List<DocumentDto>> response = call.execute();
+        return response.body();
+    }
+
+    public List<DocumentDto> searchByPathName(File f) throws IOException {
+        String path = f.getName();
+        Call<List<DocumentDto>> call = iDocumentService.searchByPathBase(path, null, false);
+        Response<List<DocumentDto>> response = call.execute();
+        return response.body();
+    }
+
+    public List<DocumentDto> moveDocuments(int id, Integer idTarget, String pathBase) throws IOException {
+        Call<List<DocumentDto>> call = iDocumentService.moveDocument(idTarget, pathBase, Collections.singletonList(id));
+        Response<List<DocumentDto>> response = call.execute();
         return response.body();
     }
 }

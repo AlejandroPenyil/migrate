@@ -1,5 +1,6 @@
 package com.soincon.migrate.logic;
 
+import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.newDtos.DocumentDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
@@ -9,11 +10,12 @@ import com.soincon.migrate.filter.Content;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
-import lombok.extern.java.Log;
+import com.soincon.migrate.updateLogic.DocumentService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
+import javax.print.Doc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +36,7 @@ public class MigrateSystem {
     public static int fi = 0;
     public static int currentStep = 1;
     private static long startTime = -1;
+    private static String uuid;
 
     public MigrateSystem() throws IOException {
         this.implNew = new ImplNew();
@@ -68,6 +71,10 @@ public class MigrateSystem {
                     }
 
                     documentDto = implNew.createDocument(documentDto, file.getParentFile().getPath().toLowerCase());
+
+                    documentDto.setUuid(uuid);
+
+                    documentDto = DocumentService.updateDocument(documentDto);
                     for (File subFile : Objects.requireNonNull(file.listFiles())) {
                         ++currentStep;
                         migrate(subFile.getAbsolutePath(), documentDto, directory);
@@ -170,8 +177,8 @@ public class MigrateSystem {
 
     private String refactorName(String name) {
         name = name.toLowerCase();
-        name = name.replace("-"," ");
-        name = name.replace("_"," ");
+        name = name.replace("-", " ");
+        name = name.replace("_", " ");
         return name;
     }
 
@@ -186,6 +193,7 @@ public class MigrateSystem {
         if (!fileDtoList.isEmpty()) {
             for (DirectoryDto fileDto : fileDtoList) {
                 if (file.getParentFile().getAbsolutePath().equalsIgnoreCase(fileDto.getPathBase())) {
+                    uuid = fileDto.getId();
                     return true;
                 }
             }
@@ -495,5 +503,242 @@ public class MigrateSystem {
             }
         }
         file.delete();
+    }
+
+    public void newMigration(File f) throws Exception {
+        File file = new File(f.getAbsolutePath() + "\\emisuite");
+        if (file.exists()) {
+            DocumentDto documentDto = findDocument(file);
+            moveToEmisuite(f.getAbsolutePath() + "\\clients", file, documentDto);
+        } else {
+            DocumentDto documentDto = new DocumentDto();
+            documentDto.setTypeDoc("FOLDER");
+            documentDto.setName(file.getName());
+            documentDto = implNew.createDocument(documentDto, file.getAbsolutePath());
+            file.mkdirs();
+
+            moveToEmisuite(f.getAbsolutePath() + "\\clients", file, documentDto);
+        }
+    }
+
+    private DocumentDto findDocument(File file) throws IOException {
+        DocumentDto documentDto = new DocumentDto();
+
+        documentDto.setName(file.getName());
+        documentDto.setTypeDoc("FOLDER");
+
+        List<DocumentDto> documentDtoList = implNew.search(documentDto);
+
+        for (DocumentDto documentDto1 : documentDtoList) {
+            if (documentDto1.getName().equals(file.getName()) && documentDto1.getIdParent() == null) {
+                return documentDto1;
+            }
+        }
+
+        return documentDto;
+    }
+
+    private void moveToEmisuite(String s, File file, DocumentDto documentDto) throws Exception {
+        File old = new File(s + "\\1\\vt");
+        File neu = new File(file.getAbsolutePath() + "\\visual tracking");
+
+        if (old.exists()) {
+            long id = buscar(old);
+            implNew.moveDocuments(Math.toIntExact(id), Math.toIntExact(documentDto.getIdDocument()), null);
+
+            old = new File(file.getAbsolutePath() + "\\vt");
+            if (old.renameTo(neu)) {
+                actualizarNew((int) id, "visual tracking", documentDto);
+            }
+        } else {
+            if (neu.mkdir()) {
+                crearNew(neu, documentDto);
+            }
+        }
+
+        old = new File(s + "\\1\\easy gmao");
+        neu = new File(file.getAbsolutePath() + "\\easy gmao");
+
+        if (old.exists()) {
+            long id = buscar(old);
+            implNew.moveDocuments(Math.toIntExact(id), Math.toIntExact(documentDto.getIdDocument()), null);
+            old = new File(file.getAbsolutePath() + "\\easy gmao");
+            if (old.renameTo(neu)) {
+                actualizarNew((int) id, "easy gmao", documentDto);
+            }
+        } else {
+            if (neu.mkdir()) {
+                crearNew(neu, documentDto);
+            }
+        }
+
+        old = new File(s + "\\clientid 1\\my factory");
+        neu = new File(file.getAbsolutePath() + "\\my factory");
+
+        if (old.exists()) {
+            long id = buscar(old);
+            implNew.moveDocuments(Math.toIntExact(id), Math.toIntExact(documentDto.getIdDocument()), null);
+            old = new File(file.getAbsolutePath() + "\\my factory");
+            if (old.renameTo(neu)) {
+                actualizarNew((int) id, "my factory", documentDto);
+            }
+        } else {
+            if (neu.mkdir()) {
+                crearNew(neu, documentDto);
+            }
+        }
+    }
+
+    private long buscar(File old) throws IOException {
+        return implNew.searchByPath(old).get(0).getIdDocument();
+    }
+
+    private void crearNew(File neu, DocumentDto documenDto) throws Exception {
+        DocumentDto documentDto = new DocumentDto();
+
+        documentDto.setName(neu.getName());
+        documentDto.setIdParent(documenDto.getIdDocument());
+
+        implNew.createDocument(documentDto, neu.getAbsolutePath());
+    }
+
+    private void actualizarNew(int id, String name, DocumentDto documentDto) throws IOException {
+        DocumentDto documentsDto = implNew.getDocument(id);
+
+        documentsDto.setName(name);
+        documentsDto.setIdParent(documentDto.getIdDocument());
+
+        implNew.updateDocument(documentsDto);
+    }
+
+    public void comprobacionesDP(File f) throws Exception {
+        boolean encontrado = false;
+        int id = 0;
+        List<DocumentDto> documentDtos = implNew.searchByPathName(new File("digital people"));
+        File dp = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people");
+
+        DirectoryDto digitalPeople = implOld.getDirectory("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
+
+        if (digitalPeople != null) {
+
+            dp = new File(digitalPeople.getPathBase());
+            if (dp.exists()) {
+                encontrado = true;
+                id = Integer.parseInt(digitalPeople.getId());
+            }
+        }
+
+        if (encontrado) {
+            WarningUtil.showWarning("Important", "Do you want to copy the content of digital people [Y/N] " +
+                    "N to create an empty folder \n " +
+                    "(C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people) :");
+            Boolean t;
+            do {
+                String sino = WarningUtil.answer();
+                switch (sino.toLowerCase()) {
+                    case ("y"):
+                        log.info("Are you sure? y/n");
+                        sino = WarningUtil.answer();
+                        switch (sino.toLowerCase()) {
+                            case ("y"):
+                                WarningUtil.showWarning("Important", "Donde quieres copiar el contenido de digital people: " +
+                                        "\n(Ruta por defecto: C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people)");
+                                String path = WarningUtil.answer();
+                                if (path.isEmpty()) {
+                                    log.info("Using the default path: C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people)");
+                                    File digital = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people");
+
+                                    List<DocumentDto> documentDto1 = implNew.searchByPathName(digital.getParentFile());
+                                    List<DocumentDto> documentDto = implNew.moveDocuments(id, Math.toIntExact(documentDto1.get(0).getIdDocument()), null);
+                                    DocumentDto documentDto2 = documentDto.get(0);
+                                    documentDto2.setIdParent(documentDto1.get(0).getIdDocument());
+
+                                    implNew.updateDocument(documentDto2);
+
+                                } else {
+                                    File digital = new File(path);
+                                    if (digital.mkdir()) {
+                                        DocumentDto digitalp = new DocumentDto();
+                                        digitalp.setName(digital.getName());
+                                        digitalp.setTypeDoc("FOLDER");
+
+                                        DocumentDto documentDto = implNew.createDocument(digitalp,digital.getParent());
+                                        implNew.moveDocuments(id, Math.toIntExact(documentDto.getIdDocument()), null);
+                                    }
+                                }
+                                break;
+                            default:
+                                File digital = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people");
+                                if (digital.mkdir()) {
+                                    DocumentDto documentDto = new DocumentDto();
+                                    documentDto.setIdDocument((long) id);
+                                    documentDto.setName("digital people");
+                                    documentDto.setTypeDoc("FOLDER");
+
+                                    File create = new File("emisuite");
+
+                                    List<DocumentDto> documentDto1 = implNew.searchByPathName(create);
+
+                                    documentDto.setIdParent(documentDto1.get(0).getIdDocument());
+
+                                    documentDto = implNew.updateDocument(documentDto);
+                                }
+                                break;
+                        }
+                        t = true;
+                        break;
+                    case ("n"):
+                        File digital = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\emisuite\\digital people");
+                        if (digital.mkdir()) {
+                            DocumentDto documentDto = new DocumentDto();
+                            documentDto.setIdDocument((long) id);
+                            documentDto.setName("digital people");
+                            documentDto.setTypeDoc("FOLDER");
+
+                            File create = new File("emisuite");
+
+                            List<DocumentDto> documentDto1 = implNew.searchByPathName(create);
+
+                            documentDto.setIdParent(documentDto1.get(0).getIdDocument());
+
+                            documentDto = implNew.updateDocument(documentDto);
+                        }
+                        t = true;
+                        break;
+                    default:
+                        log.info("Choose an option Y/N");
+                        t = false;
+                        break;
+                }
+            } while (!t);
+        } else {
+            log.info("digital people doesn't found with uuid 3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
+            if (dp.mkdir()) {
+                DocumentDto documentDto = new DocumentDto();
+                documentDto.setName("digital people");
+                documentDto.setTypeDoc("FOLDER");
+
+                File create = new File("emisuite");
+
+                documentDto = implNew.createDocument(documentDto, create.getName());
+                documentDto.setUuid("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
+
+                DocumentService.updateDocument(documentDto);
+            }
+        }
+
+    }
+
+    private String setPathBase(DocumentDto documentDto) throws IOException {
+        String cadena = "";
+        if (documentDto.getIdParent() != null) {
+            cadena += setPathBase(implNew.getDocument(documentDto.getIdParent())) + "\\";
+        }
+        if (cadena.isEmpty()) {
+            cadena = "C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest";
+        }
+        cadena += "\\" + documentDto.getName();
+
+        return cadena;
     }
 }

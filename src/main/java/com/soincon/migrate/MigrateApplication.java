@@ -4,6 +4,7 @@ import com.soincon.migrate.logic.ProgressIndicator;
 import lombok.extern.log4j.Log4j2;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
+import org.fusesource.jansi.AnsiConsole;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -98,10 +99,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         }
 
         Scanner src = new Scanner(System.in);
-        WarningUtil.showWarning("IMPORTANT", "Enter the root location to clean (leave empty to use the" +
-                " default path):\n" + odl);
+
 //        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
-        String pathroot = src.nextLine();
+        String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANT",
+                "Enter the root location to clean (leave empty to use the" + " default path):\n" + odl +"\n");
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
             log.info("Using the default path: {}", pathroot);
@@ -118,9 +119,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             }
         }
 
-        WarningUtil.showWarning("IMPORTANT", "Enter the new root location (leave empty to use the default path):\n" + f);
+
 //        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
-        String newRoot = src.nextLine();
+        String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANT",
+                "Enter the new root location (leave empty to use the default path):\n" + f +"\n");
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
             log.info("Using the default path: {}", newRoot);
@@ -142,22 +144,26 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
         try {
-            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-            Thread progressThread = new Thread(progressIndicator);
-            progressThread.start();
-            migrateSystem.migrate(pathroot, null, f);
-            progressIndicator.stop();
+//            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+//            Thread progressThread = new Thread(progressIndicator);
+//            progressThread.start();
+//            migrateSystem.migrate(pathroot, null, f);
+//            progressIndicator.stop();
+//
+//            migrateSystem.newMigration(f);
+
+            migrateSystem.comprobacionesDP(f);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         System.out.println();
         log.info("Migration completed.");
 
-        WarningUtil.showWarning("ALERT", "Do you want to delete the folders from the old root? If you delete them, you will not be able to recover them later. Y/N");
+        WarningUtil.showAlert("ALERT", "Do you want to delete the folders from the old root? If you delete them, you will not be able to recover them later. Y/N");
 
         boolean t;
         do {
-            String opc = src.next();
+            String opc = WarningUtil.answer();
             switch (opc) {
                 case ("y"):
                 case ("Y"):
@@ -187,6 +193,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             }
         } while (t);
         log.info("Program ended");
+        AnsiConsole.systemUninstall();
 
     }
 
@@ -245,7 +252,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                 System.err.println("Error guardando las propiedades: " + e.getMessage());
             }
 
-            log.info("Empezando a migrar todo a esta ubicacion " + f.getAbsolutePath());
+            log.info("Empezando a migrar t0do a esta ubicacion " + f.getAbsolutePath());
 
             Scanner src = new Scanner(System.in);
             System.out.println("Pasa la ubicacion de root para limpiar");
@@ -260,7 +267,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             migrateSystem.cleanRoot(pathroot, newRoot);
 
 
-            log.info("Modificando a migrar todo de esta ubicacion " + pathroot);
+            log.info("Modificando a migrar tod0 de esta ubicacion " + pathroot);
             log.info("Esto llevara un rato...");
             migrateSystem.migrate(pathroot, null, f);
             log.info(fi);

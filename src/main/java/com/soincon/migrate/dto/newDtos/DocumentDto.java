@@ -13,4 +13,5 @@ public class DocumentDto {
     private String mimeType;
     private String typeDoc;
     private Long idParent;
+    private String uuid;
 }

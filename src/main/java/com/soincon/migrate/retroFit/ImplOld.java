@@ -51,4 +51,10 @@ public class ImplOld {
         assert response.body() != null;
         return response.body().getResults();
     }
+
+    public DirectoryDto getDirectory(String uuid) throws IOException {
+        Call<DirectoryDto> call = directoryService.getDirectories(uuid);
+        Response<DirectoryDto> response = call.execute();
+        return response.body();
+    }
 }

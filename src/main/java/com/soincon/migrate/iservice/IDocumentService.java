@@ -11,7 +11,7 @@ public interface IDocumentService {
     Call<List<DocumentDto>> findRootDocuments();
 
     @POST("document/pathbase")
-    Call<DocumentDto> createDocument(@Query("pathbase") String path, @Body DocumentDto documentDto);
+    Call<DocumentDto> createDocument(@Query("pathBase") String path, @Body DocumentDto documentDto);
 
     @GET("document/search")
     Call<List<DocumentDto>> searchDocument(@Query("name") String name,
@@ -21,4 +21,17 @@ public interface IDocumentService {
 
     @GET("document/{id}")
     Call<DocumentDto> getDocument(@Path("id") long id);
+
+    @PUT("document/{id}")
+    Call<DocumentDto> updateDocument(@Path("id")long id, @Body DocumentDto documentDto);
+
+    @GET("document/searchByPathAndIdParent")
+    Call<List<DocumentDto>> searchByPathBase(@Query("pathBase") String PathBase,
+                                             @Query("idParent") Integer idParent,
+                                             @Query("isFile")boolean f);
+
+    @POST("document/moveDocument")
+    Call<List<DocumentDto>> moveDocument(@Query("idTarget") Integer idTarget,
+                                   @Query("pathBase") String pathBase,
+                                   @Body List<Integer> ids);
 }

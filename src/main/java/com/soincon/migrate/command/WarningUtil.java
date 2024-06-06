@@ -1,44 +1,53 @@
 package com.soincon.migrate.command;
 
+import org.fusesource.jansi.AnsiConsole;
+
+import java.util.Scanner;
+
 public class WarningUtil {
 
+    // Códigos de colores ANSI
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+    static {
+        // Inicializa Jansi
+        AnsiConsole.systemInstall();
+    }
+
+    // Método para mostrar advertencias con colores
     public static void showWarning(String title, String message) {
-        int width = 60; // Ajusta el ancho según sea necesario
-        String border = "-".repeat(width);
-        String formattedTitle = String.format("| %s |", centerText(title, width - 4));
-        String[] formattedMessages = formatMessage(message, width - 4);
-
-        System.out.println(border);
-        System.out.println(formattedTitle);
-        for (String line : formattedMessages) {
-            System.out.println(String.format("| %s |", centerText(line, width - 4)));
-        }
-        System.out.println(border);
+        System.out.println(ANSI_YELLOW + title + ": " + ANSI_RESET+ ANSI_BLUE + message + ANSI_RESET);
     }
 
-    private static String centerText(String text, int width) {
-        if (text.length() >= width) {
-            return text.substring(0, width);
-        }
-        int leftPadding = (width - text.length()) / 2;
-        int rightPadding = width - text.length() - leftPadding;
-        return " ".repeat(leftPadding) + text + " ".repeat(rightPadding);
+    public static String showWarningAndReadInput(String title, String message) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print(ANSI_YELLOW + title + ": " + ANSI_RESET + ANSI_CYAN + message + ANSI_RESET);
+        System.out.print(ANSI_GREEN);  // Cambia el color antes de la entrada del usuario
+        String input = scanner.nextLine();
+        System.out.print(ANSI_RESET);  // Resetea el color después de la entrada del usuario
+        return input;
     }
 
-    private static String[] formatMessage(String message, int width) {
-        String[] words = message.split(" ");
-        StringBuilder line = new StringBuilder();
-        StringBuilder formattedMessage = new StringBuilder();
-        for (String word : words) {
-            if (line.length() + word.length() + 1 > width) {
-                formattedMessage.append(line.toString().stripTrailing()).append("\n");
-                line = new StringBuilder();
-            }
-            line.append(word).append(" ");
-        }
-        formattedMessage.append(line.toString().stripTrailing());
-        return formattedMessage.toString().split("\n");
+    public static void showAlert(String title, String message) {
+        System.out.println(ANSI_RED + title + ": " + ANSI_YELLOW + message+ ANSI_RESET);
+    }
+
+    public static String answer() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print(ANSI_GREEN);
+        String input = scanner.nextLine();
+        System.out.print(ANSI_RESET);  // Resetea el color después de la entrada del usuario
+        return input;
     }
 }
+
 
 
