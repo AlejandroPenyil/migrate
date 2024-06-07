@@ -47,6 +47,12 @@ public class WarningUtil {
         System.out.print(ANSI_RESET);  // Resetea el color después de la entrada del usuario
         return input;
     }
+
+    public static void showError(){
+        System.out.println(ANSI_RED);
+        System.out.println("Un error ha ocurrido");
+        System.out.println(ANSI_RESET);
+    }
 }
 
 

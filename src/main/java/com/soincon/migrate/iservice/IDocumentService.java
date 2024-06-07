@@ -34,4 +34,13 @@ public interface IDocumentService {
     Call<List<DocumentDto>> moveDocument(@Query("idTarget") Integer idTarget,
                                    @Query("pathBase") String pathBase,
                                    @Body List<Integer> ids);
+
+    @POST("document/copyDocument")
+    Call<List<DocumentDto>> copyDocument(@Query("idTarget") Integer idTarget,
+                                         @Query("pathBase") String pathBase,
+                                         @Query("isOnlyContent") boolean content,
+                                         @Body List<Integer> ids);
+
+    @GET("legacyfile/findByUUID/{idDocument}")
+    Call<DocumentDto> findDocumentByUUID(@Path("idDocument") String idDocument);
 }

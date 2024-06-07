@@ -9,6 +9,7 @@ import lombok.ToString;
 @ToString
 public class DocumentDto {
     private Long idDocument;
+    private Integer idDoc;
     private String name;
     private String mimeType;
     private String typeDoc;

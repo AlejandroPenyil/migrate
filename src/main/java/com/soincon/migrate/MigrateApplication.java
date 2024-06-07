@@ -28,7 +28,7 @@ import java.util.Scanner;
 public class MigrateApplication implements CommandLineRunner, Runnable {
     public static int totalFilesAndDirectories;
 
-    public static File f = new File("C:\\soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
+    public static File f = new File("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
     private File odl = new File("c:\\opt\\tools\\tomcat\\latest\\files\\clients");
 
     @CommandLine.Option(names = {"-a1", "--api1"}, description = "URL base para la API de la que se va a migrar", required = true)
@@ -36,6 +36,15 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
     @CommandLine.Option(names = {"-a2", "--api2"}, description = "URL base para la API a la que se quiere migrar", required = true)
     private String api2Url;
+
+    @CommandLine.Option(names = {"-d", "--url"}, description = "URL de la base de datos (jdbc:mysql:// se da por hecho)", required = true)
+    private String dbUrl;
+
+    @CommandLine.Option(names = {"-u", "--user"}, description = "Nombre del usuario en la base de datos", required = true)
+    private String user;
+
+    @CommandLine.Option(names = {"-p", "--pass"}, description = "Contraseña de la base de datos", required = true)
+    private String password;
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MigrateApplication());
@@ -79,6 +88,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         System.setProperty("api.base.url", api1Url);
         System.setProperty("api2.base.url", api2Url);
+        System.setProperty("spring.datasource.url","jdbc:mysql://"+dbUrl);
+        System.setProperty("spring.datasource.username",user);
+        System.setProperty("spring.datasource.password",password);
 //        // Establecer nuevas propiedades
 //        properties.setProperty("api.base.url", api1Url);
 //        properties.setProperty("api2.base.url", api2Url);
@@ -152,7 +164,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 //
 //            migrateSystem.newMigration(f);
 
-            migrateSystem.comprobacionesDP(f);
+            migrateSystem.config(f);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,18 +1,25 @@
 package com.soincon.migrate.updateLogic;
 
 import com.soincon.migrate.dto.newDtos.DocumentDto;
+import org.springframework.core.convert.Property;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DocumentService {
-    private static final String URL = "jdbc:mysql://localhost:3306/documentmanager";
-    private static final String USER = "root";
-    private static final String PASSWORD = "root";
+
+    private static String URL = "";
+    private static String USER = "root";
+    private static String PASSWORD = "root";
 
     public static DocumentDto updateDocument(DocumentDto documentDto) {
+        URL = System.getProperty("spring.datasource.url");
+        USER = System.getProperty("spring.datasource.username");
+        PASSWORD = System.getProperty("spring.datasource.password");
+
         String sql = "UPDATE dmr_documents SET uuid = ? WHERE idDocument = ?";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);

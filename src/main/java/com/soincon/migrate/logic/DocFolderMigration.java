@@ -22,10 +22,10 @@ public class DocFolderMigration {
     public DocFolderMigration(File file, DocumentDto parent) throws IOException {
         this.implNew = new ImplNew();
         this.documentDto = parent;
-        this.exist = isExist(file);
-        if(!this.exist) {
+//        this.exist = isExist(file);
+//        if(!this.exist) {
             this.idParent = parentId(file);
-        }
+//        }
 
     }
 
@@ -71,27 +71,27 @@ public class DocFolderMigration {
         return path.toString();
     }
 
-    public boolean isExist(File file) throws IOException {
-        DocumentDto documentDto = new DocumentDto();
-
-        documentDto.setName(file.getName().toLowerCase());
-
-        if(this.documentDto != null){
-            documentDto.setIdParent(this.documentDto.getIdDocument());
-        }
-
-        List<DocumentDto> documentDtos = implNew.search(documentDto);
-
-        if (!documentDtos.isEmpty()) {
-            for (DocumentDto documentDto2 : documentDtos) {
-                String path = makePath(documentDto2);
-                if (path.equals(file.getAbsolutePath())) {
-                    this.documentDto = documentDto2;
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+//    public boolean isExist(File file) throws IOException {
+//        DocumentDto documentDto = new DocumentDto();
+//
+//        documentDto.setName(file.getName().toLowerCase());
+//
+//        if(this.documentDto != null){
+//            documentDto.setIdParent(this.documentDto.getIdDocument());
+//        }
+//
+//        List<DocumentDto> documentDtos = implNew.search(documentDto);
+//
+//        if (!documentDtos.isEmpty()) {
+//            for (DocumentDto documentDto2 : documentDtos) {
+//                String path = makePath(documentDto2);
+//                if (path.equals(file.getAbsolutePath())) {
+//                    this.documentDto = documentDto2;
+//                    return true;
+//                }
+//            }
+//        }
+//
+//        return false;
+//    }
 }

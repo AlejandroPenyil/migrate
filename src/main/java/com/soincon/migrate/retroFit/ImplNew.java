@@ -72,8 +72,8 @@ public class ImplNew {
         return response.body();
     }
 
-    public List<DocumentDto> searchByPath(File f) throws IOException {
-        String path = f.getAbsolutePath().replace("\\","/");
+    public List<DocumentDto> searchByPath(String f) throws IOException {
+        String path = f.replace("\\","/");
         Call<List<DocumentDto>> call = iDocumentService.searchByPathBase(path, null, false);
         Response<List<DocumentDto>> response = call.execute();
         return response.body();
@@ -88,6 +88,18 @@ public class ImplNew {
 
     public List<DocumentDto> moveDocuments(int id, Integer idTarget, String pathBase) throws IOException {
         Call<List<DocumentDto>> call = iDocumentService.moveDocument(idTarget, pathBase, Collections.singletonList(id));
+        Response<List<DocumentDto>> response = call.execute();
+        return response.body();
+    }
+
+    public DocumentDto findByUUID(String UUID) throws IOException {
+        Call<DocumentDto> call = iDocumentService.findDocumentByUUID(UUID);
+        Response<DocumentDto> response = call.execute();
+        return response.body();
+    }
+
+    public List<DocumentDto> copyDocuments(int id, Integer idTarget, String pathBase) throws IOException {
+        Call<List<DocumentDto>> call = iDocumentService.copyDocument(idTarget, pathBase,true, Collections.singletonList(id));
         Response<List<DocumentDto>> response = call.execute();
         return response.body();
     }
