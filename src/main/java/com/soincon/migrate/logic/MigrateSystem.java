@@ -35,7 +35,6 @@ public class MigrateSystem {
     ImplNew implNew;
     public static int fi = 0;
     public static int currentStep = 1;
-    private static long startTime = -1;
     private static String uuid;
 
     public MigrateSystem() throws IOException {

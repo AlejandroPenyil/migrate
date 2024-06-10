@@ -68,7 +68,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
      */
     @Override
     public void run() {
-        WarningUtil.showWarning("IMPORTANT", "This program will make changes to the file system and they cannot be undone.");
+        WarningUtil.showAlert("IMPORTANTE", "Este programa puede hacer cambios que no se podran desacer.");
 
 
         Properties properties = new Properties();
@@ -105,7 +105,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         // Guardar las propiedades en el archivo
         try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
-            properties.store(propertiesOutputStream, "Database updated");
+            properties.store(propertiesOutputStream, "");
         } catch (IOException e) {
             System.err.println("Error saving properties: " + e.getMessage());
         }
@@ -113,11 +113,11 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         Scanner src = new Scanner(System.in);
 
 //        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
-        String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANT",
-                "Enter the root location to clean (leave empty to use the" + " default path):\n" + odl +"\n");
+        String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
+                "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl +"\n");
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
-            log.info("Using the default path: {}", pathroot);
+            log.info("Usando el path por defecto: {}", pathroot);
         }
 
 
@@ -126,18 +126,18 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             try {
                 throw new FileNotFoundException();
             } catch (FileNotFoundException e) {
-                log.error("The old root location was not found");
+                WarningUtil.showAlert("ERROR","La ruta por defecto antigua no ha sido encontrada");
                 return;
             }
         }
 
 
 //        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
-        String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANT",
-                "Enter the new root location (leave empty to use the default path):\n" + f +"\n");
+        String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
+                "Introduce la nueva localizacion root (dejalo vacio para usar el path por defecto):\n" + f +"\n");
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
-            log.info("Using the default path: {}", newRoot);
+            log.info("Usando el path por defecto: {}", newRoot);
         }
 
 
@@ -150,8 +150,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        log.info("Modifying everything in this location: {}", pathroot);
-        log.info("This will take a while...");
+        log.info("Modificando todo de: {}", pathroot);
+        log.info("Esto llevara un rato...");
 
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
@@ -162,6 +162,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             migrateSystem.migrate(pathroot, null, f);
             progressIndicator.stop();
 
+            System.out.println();
             migrateSystem.newMigration(f);
 
             migrateSystem.config(f);
@@ -169,9 +170,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
         System.out.println();
-        log.info("Migration completed.");
+        log.info("Migracion completada.");
 
-        WarningUtil.showAlert("ALERT", "Do you want to delete the folders from the old root? If you delete them, you will not be able to recover them later. Y/N");
+        WarningUtil.showAlert("ALERTA", "¿Quieres borrar todos los archivos del root antiguo? si lo borras " +
+                "no lo podras recuperar mas tarde. Y/N");
 
         boolean t;
         do {
@@ -179,13 +181,13 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             switch (opc) {
                 case ("y"):
                 case ("Y"):
-                    log.info("Are you sure? y/n");
+                    WarningUtil.showWarning("SEGURO","¿Estas seguro? y/n");
                     src.nextLine();
                     opc = src.next();
                     switch (opc) {
                         case ("y"):
                         case ("Y"):
-                            log.info("Deleting the entire old directory structure");
+                            WarningUtil.showWarning("INFORMACION","Borrando todo ");
                             migrateSystem.borrar(pathroot);
                             break;
                         default:
@@ -195,16 +197,16 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     break;
                 case ("n"):
                 case ("N"):
-                    log.info("Ending the program");
+                    log.info("Terminando el programa");
                     t = false;
                     break;
                 default:
-                    log.info("Choose an option Y/N");
+                    log.info("Elige una opcion Y/N");
                     t = true;
                     break;
             }
         } while (t);
-        log.info("Program ended");
+        log.info("Programa terminado");
         AnsiConsole.systemUninstall();
 
     }
