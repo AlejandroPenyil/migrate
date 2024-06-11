@@ -5,9 +5,11 @@ import lombok.extern.log4j.Log4j2;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
 import org.fusesource.jansi.AnsiConsole;
+import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.env.Environment;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -24,7 +26,7 @@ import java.util.Scanner;
 @SpringBootApplication
 @Log4j2
 @CommandLine.Command(name = "migrate", mixinStandardHelpOptions = true, version = "1.0",
-        description = "MigrateApplication realiza tareas de migración.")
+        description = "MigrateApplication, realiza tareas de migración.")
 public class MigrateApplication implements CommandLineRunner, Runnable {
     public static int totalFilesAndDirectories;
 
@@ -56,7 +58,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         }
 
         // Lanzar la aplicación Spring Boot
-        SpringApplication.run(MigrateApplication.class, args);
+        SpringApplication app = new SpringApplication(MigrateApplication.class);
+        app.setBanner(new CustomBanner());
+        app.run(args);
+
 
         // Ejecutar el comando PicoCLI
         int exitCode = commandLine.execute(args);
@@ -64,11 +69,27 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     }
 
     /**
+     *  Generar el banner de la aplicación
+     */
+    private static class CustomBanner implements Banner {
+        @Override
+        public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
+            try {
+                String bannerText = "";
+
+                out.println(bannerText);
+            } catch (Exception e) {
+                out.println("Error al generar el banner: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * ejecutar el programa en la la consola de picocli
      */
     @Override
     public void run() {
-        WarningUtil.showAlert("IMPORTANTE", "Este programa puede hacer cambios que no se podran desacer.");
+        WarningUtil.showAlert("ALERTA", "Este programa puede hacer cambios que no se podran desacer.");
 
 
         Properties properties = new Properties();
@@ -165,7 +186,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             System.out.println();
             migrateSystem.newMigration(f);
 
-            migrateSystem.config(f);
+            migrateSystem.config();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

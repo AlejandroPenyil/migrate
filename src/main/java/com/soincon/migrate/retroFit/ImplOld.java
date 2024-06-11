@@ -3,6 +3,7 @@ package com.soincon.migrate.retroFit;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
+import com.soincon.migrate.dto.oldDtos.PathDto;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.filter.PaginatedList;
 import com.soincon.migrate.iservice.DirectoryService;
@@ -12,6 +13,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ImplOld {
@@ -55,6 +57,18 @@ public class ImplOld {
     public DirectoryDto getDirectory(String uuid) throws IOException {
         Call<DirectoryDto> call = directoryService.getDirectories(uuid);
         Response<DirectoryDto> response = call.execute();
+        return response.body();
+    }
+
+    public List<DirectoryDto> getDirectoryPathBase(PathDto pathDto) throws IOException {
+        Call<List<DirectoryDto>> call = directoryService.searchByPath(true,false,false,0,pathDto);
+        Response<List<DirectoryDto>> response = call.execute();
+        return response.body();
+    }
+
+    public List<FileDto> getFilePathBase(PathDto pathDto) throws IOException {
+        Call<List<FileDto>> call = fileService.searchByPath(true,false,false,0,pathDto);
+        Response<List<FileDto>> response = call.execute();
         return response.body();
     }
 }

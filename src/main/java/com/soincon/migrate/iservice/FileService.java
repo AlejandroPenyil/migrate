@@ -2,6 +2,7 @@ package com.soincon.migrate.iservice;
 
 
 import com.soincon.migrate.dto.oldDtos.FileDto;
+import com.soincon.migrate.dto.oldDtos.PathDto;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.filter.PaginatedList;
 import retrofit2.Call;
@@ -27,4 +28,11 @@ public interface FileService {
 
     @POST("files/searchAll")
     Call<PaginatedList<FileDto>> searchFilesByFilter(@Body FilterDirectory filterDirectory);
+
+    @POST("resources/searchByPath")
+    Call<List<FileDto>> searchByPath(@Query("includeResourcePath") boolean b,
+                                     @Query("includeFileDescendants") boolean b1,
+                                     @Query("includeDirectoryDescendants") boolean b2,
+                                     @Query("level") int i,
+                                     @Body PathDto pathDto);
 }

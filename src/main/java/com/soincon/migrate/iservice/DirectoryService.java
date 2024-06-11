@@ -32,7 +32,7 @@ public interface DirectoryService {
     Call<PaginatedList<DirectoryDto>> searchDirectoryByFilterAll(@Body FilterDirectory filterDirectory);
 
     @POST("resources/searchByPath")
-    Call<List<DocumentDto>> searchByPath (@Query("includeResourcePath") boolean iResource,
+    Call<List<DirectoryDto>> searchByPath (@Query("includeResourcePath") boolean iResource,
                                           @Query("includeFileDescendants") boolean iFile,
                                           @Query("includeDirectoryDescendants") boolean iDirectory,
                                           @Query("level") Integer level,

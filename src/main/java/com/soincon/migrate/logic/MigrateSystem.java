@@ -6,6 +6,7 @@ import com.soincon.migrate.dto.newDtos.DocumentDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
+import com.soincon.migrate.dto.oldDtos.PathDto;
 import com.soincon.migrate.filter.Content;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
@@ -21,10 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.soincon.migrate.MigrateApplication.f;
 import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
@@ -54,7 +52,7 @@ public class MigrateSystem {
     public void migrate(String path, DocumentDto parent, File newPath) throws Exception {
         File file = new File(path);
         if (file.isDirectory()) {
-            String name = refactorName(file.getName());
+            String name = file.getName();
             File directory = Paths.get(String.valueOf(newPath), name).toFile();
             DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
             if (folderExist(file)) {
@@ -140,6 +138,10 @@ public class MigrateSystem {
                             documentDto.setIdParent(docFolderMigration.getDocumentDto().getIdDocument());
 
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
+                            if (uuid != null) {
+                                documentDto.setUuid(uuid);
+                                documentDto = DocumentService.updateDocument(documentDto);
+                            }
                             fi++;
                             if (documentDto != null) {
                                 createVersion(documentDto, i, fullName, file2);
@@ -175,19 +177,33 @@ public class MigrateSystem {
         }
     }
 
-    private String refactorName(String name) {
-        name = name.toLowerCase();
-        name = name.replace("-", " ");
-        name = name.replace("_", " ");
-        return name;
-    }
+//    private String refactorName(String name) {
+//        name = name.toLowerCase();
+//        name = name.replace("-", " ");
+//        name = name.replace("_", " ");
+//        return name;
+//    }
 
     private boolean folderExist(File file) throws IOException {
+        PathDto pathDto = new PathDto();
+        pathDto.setPathBase(file.getAbsolutePath());
+
+        List<DirectoryDto> directoryDtoList = implOld.getDirectoryPathBase(pathDto);
+
+        if (directoryDtoList != null) {
+            if (!directoryDtoList.isEmpty()) {
+                for (DirectoryDto directoryDto : directoryDtoList) {
+                    uuid = directoryDto.getId();
+                    return true;
+                }
+            }
+        }
+
         FilterDirectory filterDirectory = new FilterDirectory();
         Content content = new Content();
         content.setExactName(file.getName());
-        filterDirectory.setContent(content);
 
+        filterDirectory.setContent(content);
         List<DirectoryDto> fileDtoList = implOld.searchDirectoryByFilterAll(filterDirectory);
 
         if (!fileDtoList.isEmpty()) {
@@ -198,6 +214,7 @@ public class MigrateSystem {
                 }
             }
         }
+
         return false;
     }
 
@@ -209,6 +226,20 @@ public class MigrateSystem {
      * @throws IOException Returns an error if there is any issue with the file.
      */
     private boolean exists(File file) throws IOException {
+        PathDto pathDto = new PathDto();
+        pathDto.setPathBase(file.getAbsolutePath());
+
+        List<FileDto> directoryDtoList = implOld.getFilePathBase(pathDto);
+
+        if (directoryDtoList != null) {
+            if (!directoryDtoList.isEmpty()) {
+                for (FileDto directoryDto : directoryDtoList) {
+                    uuid = directoryDto.getId();
+                    return true;
+                }
+            }
+        }
+
         FilterDirectory filterDirectory = new FilterDirectory();
         Content content = new Content();
         content.setExactName(file.getName());
@@ -514,12 +545,18 @@ public class MigrateSystem {
             DocumentDto documentDto = new DocumentDto();
             documentDto.setTypeDoc("FOLDER");
             documentDto.setName(file.getName());
-            documentDto = implNew.createDocument(documentDto, "");
+            implNew.createDocument(documentDto, "");
 
             moveToEmisuite(f.getAbsolutePath() + "\\clients", file);
         }
     }
 
+    /**
+     *
+     * @param file THE FILE TO FIND IN DATA BASE
+     * @return THE DOCUMENT
+     * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
+     */
     private DocumentDto findDocument(File file) throws IOException {
         DocumentDto documentDto = new DocumentDto();
 
@@ -537,6 +574,12 @@ public class MigrateSystem {
         return documentDto;
     }
 
+    /**
+     * METHO TO MOVE THE MAIN FOLDERS TO EMISUITE
+     * @param s PATH OF THE FOLDERS
+     * @param file NEW PATH OF THE FOLDERS
+     * @throws Exception IF ANY ERROR OCCUR WITH RETROFIT
+     */
     private void moveToEmisuite(String s, File file) throws Exception {
         File old = new File(s + "\\1\\vt");
         File neu = new File(file.getAbsolutePath() + "\\Visual Tracking");
@@ -557,13 +600,13 @@ public class MigrateSystem {
             documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(s + "\\1\\easy gmao");
+        old = new File(s + "\\1\\easy-gmao");
         neu = new File(file.getAbsolutePath() + "\\Easy GMAO");
 
         if (old.exists()) {
             long id = buscar(old);
             implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
-            old = new File(file.getAbsolutePath() + "\\easy gmao");
+            old = new File(file.getAbsolutePath() + "\\easy-gmao");
             if (old.renameTo(neu)) {
                 actualizarNew((int) id, "Easy GMAO");
             }
@@ -579,13 +622,13 @@ public class MigrateSystem {
             DocumentService.updateDocument(documentDto1);
         }
 
-        old = new File(s + "\\clientid 1\\my factory");
+        old = new File(s + "\\clientid-1\\my-factory");
         neu = new File(file.getAbsolutePath() + "\\My Factory");
 
         if (old.exists()) {
             long id = buscar(old);
             implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
-            old = new File(file.getAbsolutePath() + "\\my factory");
+            old = new File(file.getAbsolutePath() + "\\my-factory");
             if (old.renameTo(neu)) {
                 actualizarNew((int) id, "My Factory");
             }
@@ -599,6 +642,12 @@ public class MigrateSystem {
 
     }
 
+    /**
+     * METHOD TO FIND THE ID OF THE FOLDER THAT ARE GOING TO MOVE TO EMISUITE
+     * @param old THE FILE THAT ARE GOING TO BE MOVED
+     * @return TE ID OF THE SPECIFIED FILE
+     * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
+     */
     private long buscar(File old) throws IOException {
         return implNew.searchByPathName(old).get(0).getIdDocument();
     }
@@ -612,6 +661,12 @@ public class MigrateSystem {
 //        implNew.createDocument(documentDto, neu.getAbsolutePath());
 //    }
 
+    /**
+     * METHOD TO UPDATE THE FOLDER IN EMISUITE
+     * @param id OF THE FOLDER TO UPDATE
+     * @param name NEW NAME OF THE FOLDER
+     * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
+     */
     private void actualizarNew(int id, String name) throws IOException {
         DocumentDto documentsDto = implNew.getDocument(id);
 
@@ -620,15 +675,24 @@ public class MigrateSystem {
         implNew.updateDocument(documentsDto);
     }
 
-    public void config(File f) throws Exception {
-        WarningUtil.showWarning("Alerta", "Ten el archivo config.json abierto, se te va a preguntar por informacion contenida en el mismo");
+    /**
+     * THIS METHOD ONLY NEED TO INITIALIZE THE CHECKS OS SGA AND DP
+     * @throws Exception IF OCCURS ANY PROBLEM IN ANY CHECK
+     */
+    public void config() throws Exception {
+        WarningUtil.showWarning("IMPORTANTE", "Ten el archivo config.json abierto, se te va a preguntar por informacion contenida en el mismo");
 
         checksSGA();
         checkDP();
     }
 
+    /**
+     * METHOD TO DO ALL THE CHECKS OF VISUAL SGA
+     * @throws Exception IF ANY METHOD OF RETROFIT FAIL
+     */
     public void checksSGA() throws Exception {
-        WarningUtil.showWarning("Importante", "¿Quieres copiar el contenido De visual SGA a la nueva carpeta que se va a crear? [Y/N]:");
+        WarningUtil.showWarning("IMPORTANTE",
+                "¿Quieres copiar el contenido De visual SGA a la nueva carpeta que se va a crear? [Y/N]:");
 
         boolean tr = true;
 
@@ -649,43 +713,57 @@ public class MigrateSystem {
                     break;
                 }
                 default: {
-                    WarningUtil.showWarning("Error", "Elige una opcion [Y/N]:");
+                    WarningUtil.showWarning("Error".toUpperCase(), "Elige una opcion [Y/N]:");
                     break;
                 }
             }
         } while (tr);
     }
 
-    private void copySGA() throws Exception {
+    /**
+     * Method to copy content FROM SGA to the that are indicated previously
+     *
+     */
+    private void copySGA() {
         try {
-            WarningUtil.showWarning("Importante", "Donde esta la carpeta con el contenido que quieres mover, " +
+            WarningUtil.showWarning("Importante".toUpperCase(), "Donde esta la carpeta con el contenido que quieres mover, " +
                     "ten en cuenta que ahora todo esta en: \nC:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest ");
             String answer = WarningUtil.answer();
-            List<DocumentDto> documentDtoList = implNew.searchByPath(answer.replace("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest", ""));
+            List<DocumentDto> documentDtoList = implNew.searchByPath(answer.
+                    replace("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest", ""));
 
             DocumentDto SGAdocument = new DocumentDto();
             SGAdocument.setName("Visual SGA");
             SGAdocument.setTypeDoc("FOLDER");
             SGAdocument = implNew.createDocument(SGAdocument, "Emisuite");
 
-            implNew.moveDocuments(Math.toIntExact(documentDtoList.get(0).getIdDocument()), Math.toIntExact(SGAdocument.getIdDocument()), null);
+            implNew.moveDocuments(Math.toIntExact(documentDtoList.get(0).getIdDocument()),
+                    Math.toIntExact(SGAdocument.getIdDocument()), null);
         } catch (Exception ex) {
             WarningUtil.showError();
             copySGA();
         }
     }
 
+    /**
+     * METHOD TO DO ALL CHECKS OF DIGITAL PEOPLE
+     * @throws Exception IF ANY METHOD OF RETROFIT FAIL
+     */
     public void checkDP() throws Exception {
         List<String> uuids = new ArrayList<>();
         String answer;
 
-        WarningUtil.showWarning("Importante", "Ahora tienes que introducir los uuids que pertenezcan a digital people, pulsa n para terminar");
+        WarningUtil.showWarning("Importante".toUpperCase(), "Ahora tienes que introducir los uuids que pertenezcan a digital people, pulsa n para terminar");
         do {
-            WarningUtil.showWarning("Importante", "Escribe un uuid, n para terminar");
+            WarningUtil.showWarning("Importante".toUpperCase(), "Escribe un uuid, n para terminar");
             answer = WarningUtil.answer();
 
             if (!answer.equalsIgnoreCase("n")) {
-                uuids.add(answer);
+                if (isUUID(answer)) {
+                    uuids.add(answer);
+                } else {
+                    WarningUtil.showWarning("ERROR", "introduce un UUID valido o n para terminar");
+                }
             }
 
         } while (!answer.equalsIgnoreCase("n"));
@@ -727,7 +805,7 @@ public class MigrateSystem {
 
                     if (documentByUUIDDto != null) {
                         List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
-                                null, "Emisuite/Digital People/dp"+i);
+                                null, "Emisuite/Digital People/dp" + i);
 ////                        if(documentDtoList == null){
 //                            implNew.copyDocuments(documentByUUIDDto.getIdDoc(),
 //                                    null, "Emisuite/Digital People");
@@ -739,6 +817,29 @@ public class MigrateSystem {
         }
     }
 
+    /**
+     * METHOD TO CHECK IF THE PARAMETER PASED BY COMMAND LINE IS A VALID UUID
+     * @param answer THE STRING TO CHECK IS VALID
+     * @return TRUE IF IS VALID
+     */
+    private boolean isUUID(String answer) {
+        if (answer == null) {
+            return false;
+        }
+
+        try {
+            UUID.fromString(answer);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * METHOD CHECK IF 1 OF THE UUIDS RECEIVED IS THE MAIN UUID OF DIGITAL PEOPLE
+     * @param uuids THE LIST OF UUIDS RECEIVED
+     * @return BOOLEAN IF ONE THE UUIDS IS THE SEARCHED
+     */
     private boolean findDP(List<String> uuids) {
         for (String UUID : uuids) {
             if (UUID.equals("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c")) {
