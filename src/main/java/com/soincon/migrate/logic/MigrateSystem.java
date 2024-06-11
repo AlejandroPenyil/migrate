@@ -576,7 +576,8 @@ public class MigrateSystem {
 
     /**
      * METHO TO MOVE THE MAIN FOLDERS TO EMISUITE
-     * @param s PATH OF THE FOLDERS
+     *
+     * @param s    PATH OF THE FOLDERS
      * @param file NEW PATH OF THE FOLDERS
      * @throws Exception IF ANY ERROR OCCUR WITH RETROFIT
      */
@@ -663,7 +664,8 @@ public class MigrateSystem {
 
     /**
      * METHOD TO UPDATE THE FOLDER IN EMISUITE
-     * @param id OF THE FOLDER TO UPDATE
+     *
+     * @param id   OF THE FOLDER TO UPDATE
      * @param name NEW NAME OF THE FOLDER
      * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
      */
@@ -677,6 +679,7 @@ public class MigrateSystem {
 
     /**
      * THIS METHOD ONLY NEED TO INITIALIZE THE CHECKS OS SGA AND DP
+     *
      * @throws Exception IF OCCURS ANY PROBLEM IN ANY CHECK
      */
     public void config() throws Exception {
@@ -688,41 +691,43 @@ public class MigrateSystem {
 
     /**
      * METHOD TO DO ALL THE CHECKS OF VISUAL SGA
+     *
      * @throws Exception IF ANY METHOD OF RETROFIT FAIL
      */
     public void checksSGA() throws Exception {
         WarningUtil.showWarning("IMPORTANTE",
-                "¿Quieres copiar el contenido De visual SGA a la nueva carpeta que se va a crear? [Y/N]:");
+                "Introduce el UUID de Visual SGA:");
 
-        boolean tr = true;
+        String sgaUUID;
+        do{
+            sgaUUID = WarningUtil.answer();
+        }while(isUUID(sgaUUID));
 
-        do {
-            String answer = WarningUtil.answer();
-            switch (answer.toLowerCase()) {
-                case ("y"): {
-                    copySGA();
-                    tr = false;
-                    break;
-                }
-                case ("n"): {
-                    DocumentDto documentDto = new DocumentDto();
-                    documentDto.setName("Visual SGA");
-                    documentDto.setTypeDoc("FOLDER");
-                    implNew.createDocument(documentDto, "Emisuite");
-                    tr = false;
-                    break;
-                }
-                default: {
-                    WarningUtil.showWarning("Error".toUpperCase(), "Elige una opcion [Y/N]:");
-                    break;
-                }
-            }
-        } while (tr);
+        DocumentDto documentByUUIDDto = implNew.findByUUID(sgaUUID);
+
+
+        if(documentByUUIDDto == null) {
+            DocumentDto documentDto = new DocumentDto();
+            documentDto.setName("Visual SGA");
+            documentDto.setTypeDoc("FOLDER");
+            implNew.createDocument(documentDto, "Emisuite");
+            documentDto.setUuid(sgaUUID);
+
+            DocumentService.updateDocument(documentDto);
+        }else{
+            List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
+                    null, "Emisuite");
+
+            documentByUUIDDto = documentDtoList.get(0);
+
+            documentByUUIDDto.setName("Visual SGA");
+            implNew.updateDocument(documentByUUIDDto);
+        }
+
     }
 
     /**
      * Method to copy content FROM SGA to the that are indicated previously
-     *
      */
     private void copySGA() {
         try {
@@ -747,13 +752,16 @@ public class MigrateSystem {
 
     /**
      * METHOD TO DO ALL CHECKS OF DIGITAL PEOPLE
+     *
      * @throws Exception IF ANY METHOD OF RETROFIT FAIL
      */
     public void checkDP() throws Exception {
         List<String> uuids = new ArrayList<>();
         String answer;
 
-        WarningUtil.showWarning("Importante".toUpperCase(), "Ahora tienes que introducir los uuids que pertenezcan a digital people, pulsa n para terminar");
+        WarningUtil.showWarning("Importante".toUpperCase(), "Ahora tienes que introducir los uuids que " +
+                "pertenezcan a digital people, si un algun UUID se repite no lo introduzcas varias veces, solo una vez," +
+                " pulsa n para terminar");
         do {
             WarningUtil.showWarning("Importante".toUpperCase(), "Escribe un uuid, n para terminar");
             answer = WarningUtil.answer();
@@ -810,6 +818,16 @@ public class MigrateSystem {
 //                            implNew.copyDocuments(documentByUUIDDto.getIdDoc(),
 //                                    null, "Emisuite/Digital People");
 ////                        }
+                    }else{
+                        DocumentDto documentDto = new DocumentDto();
+                        documentDto.setName("Digital People");
+                        documentDto.setTypeDoc("FOLDER");
+
+                        implNew.createDocument(documentDto,"Emisuite/Digital People/dp" + i);
+
+                        documentDto.setUuid(UUID);
+
+                        DocumentService.updateDocument(documentDto);
                     }
                     i++;
                 }
@@ -819,6 +837,7 @@ public class MigrateSystem {
 
     /**
      * METHOD TO CHECK IF THE PARAMETER PASED BY COMMAND LINE IS A VALID UUID
+     *
      * @param answer THE STRING TO CHECK IS VALID
      * @return TRUE IF IS VALID
      */
@@ -837,6 +856,7 @@ public class MigrateSystem {
 
     /**
      * METHOD CHECK IF 1 OF THE UUIDS RECEIVED IS THE MAIN UUID OF DIGITAL PEOPLE
+     *
      * @param uuids THE LIST OF UUIDS RECEIVED
      * @return BOOLEAN IF ONE THE UUIDS IS THE SEARCHED
      */
