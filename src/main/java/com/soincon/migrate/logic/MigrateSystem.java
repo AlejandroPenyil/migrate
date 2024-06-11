@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,7 +55,7 @@ public class MigrateSystem {
         if (file.isDirectory()) {
             String name = file.getName();
             File directory = Paths.get(String.valueOf(newPath), name).toFile();
-            DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
+//            DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
             if (folderExist(file)) {
 
 //                directory.mkdirs();
@@ -63,17 +64,27 @@ public class MigrateSystem {
                 DocumentDto documentDto = new DocumentDto();
                 documentDto.setName(name);
                 documentDto.setTypeDoc("FOLDER");
-                if (documentDto.getIdParent() == null) {
-                    documentDto.setIdParent(docFolderMigration.getIdParent());
+
+//                if (documentDto.getIdParent() == null) {
+//                    documentDto.setIdParent(docFolderMigration.getIdParent());
+//                }
+                String pathToErase = "";
+                if(directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())){
+                    pathToErase = f.getAbsolutePath();
+                }else{
+                    pathToErase = f.getAbsolutePath()+"\\";
                 }
 
-                documentDto = implNew.createDocument(documentDto, directory.getParentFile().getPath().replace(newPath.getAbsolutePath(), ""));
+                String mkdPath = directory.getParentFile().getPath().replace(pathToErase, "");
+                mkdPath = mkdPath.replace("\\","/");
+
+                documentDto = implNew.createDocument(documentDto, mkdPath);
 
                 if (uuid != null) {
                     documentDto.setUuid(uuid);
                     documentDto = DocumentService.updateDocument(documentDto);
                 }
-                for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
                     ++currentStep;
                     migrate(subFile.getAbsolutePath(), documentDto, directory);
                 }
@@ -84,6 +95,7 @@ public class MigrateSystem {
 //                    }
 //                }*/
             } else {
+                DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
                 file2.mkdir();
                 boolean t = true;
@@ -552,7 +564,6 @@ public class MigrateSystem {
     }
 
     /**
-     *
      * @param file THE FILE TO FIND IN DATA BASE
      * @return THE DOCUMENT
      * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
@@ -645,6 +656,7 @@ public class MigrateSystem {
 
     /**
      * METHOD TO FIND THE ID OF THE FOLDER THAT ARE GOING TO MOVE TO EMISUITE
+     *
      * @param old THE FILE THAT ARE GOING TO BE MOVED
      * @return TE ID OF THE SPECIFIED FILE
      * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
@@ -695,22 +707,22 @@ public class MigrateSystem {
      * @throws Exception IF ANY METHOD OF RETROFIT FAIL
      */
     public void checksSGA() throws Exception {
-        WarningUtil.showWarning("IMPORTANTE",
-                "Introduce el UUID de Visual SGA:");
-
         String sgaUUID;
         do{
+            WarningUtil.showWarning("IMPORTANTE",
+                    "Introduce el UUID de Visual SGA:");
             sgaUUID = WarningUtil.answer();
-        }while(isUUID(sgaUUID));
+        }while(!isUUID(sgaUUID));
 
         DocumentDto documentByUUIDDto = implNew.findByUUID(sgaUUID);
 
 
         if(documentByUUIDDto == null) {
+
             DocumentDto documentDto = new DocumentDto();
             documentDto.setName("Visual SGA");
             documentDto.setTypeDoc("FOLDER");
-            implNew.createDocument(documentDto, "Emisuite");
+            documentDto = implNew.createDocument(documentDto, "Emisuite");
             documentDto.setUuid(sgaUUID);
 
             DocumentService.updateDocument(documentDto);
@@ -718,10 +730,14 @@ public class MigrateSystem {
             List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
                     null, "Emisuite");
 
-            documentByUUIDDto = documentDtoList.get(0);
+            documentByUUIDDto = implNew.getDocument(documentByUUIDDto.getIdDoc());
 
-            documentByUUIDDto.setName("Visual SGA");
-            implNew.updateDocument(documentByUUIDDto);
+            File file = new File("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\Emisuite\\" + documentByUUIDDto.getName());
+
+            if(file.renameTo(new File(file.getParentFile()+"\\Visual SGA"))) {
+                documentByUUIDDto.setName("Visual SGA");
+                implNew.updateDocument(documentByUUIDDto);
+            }
         }
 
     }
