@@ -11,14 +11,14 @@ import java.util.Properties;
 
 public class DocumentService {
 
-    private static String URL = "";
-    private static String USER = "root";
-    private static String PASSWORD = "root";
+    private static String URL = System.getProperty("spring.datasource.url");
+    private static String USER = System.getProperty("spring.datasource.username");
+    private static String PASSWORD = System.getProperty("spring.datasource.password");
 
     public static DocumentDto updateDocument(DocumentDto documentDto) {
-        URL = System.getProperty("spring.datasource.url");
-        USER = System.getProperty("spring.datasource.username");
-        PASSWORD = System.getProperty("spring.datasource.password");
+//        URL = System.getProperty("spring.datasource.url");
+//        USER = System.getProperty("spring.datasource.username");
+//        PASSWORD = System.getProperty("spring.datasource.password");
 
         String sql = "UPDATE dmr_documents SET uuid = ? WHERE idDocument = ?";
 
@@ -41,4 +41,5 @@ public class DocumentService {
 
         return documentDto;
     }
+
 }
