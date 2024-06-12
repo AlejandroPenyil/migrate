@@ -652,6 +652,12 @@ public class MigrateSystem {
             documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
         }
 
+        DocumentDto documentDto1 = new DocumentDto();
+        documentDto1.setName("Visual SGA");
+        documentDto1.setTypeDoc("FOLDER");
+
+        documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
+
     }
 
     /**
@@ -697,7 +703,7 @@ public class MigrateSystem {
     public void config() throws Exception {
         WarningUtil.showWarning("IMPORTANTE", "Ten el archivo config.json abierto, se te va a preguntar por informacion contenida en el mismo");
 
-        checksSGA();
+//        checksSGA();
         checkDP();
     }
 
@@ -804,6 +810,13 @@ public class MigrateSystem {
             documentDto.setUuid("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
 
             DocumentService.updateDocument(documentDto);
+        }else{
+            int position = uuids.indexOf("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
+
+            DocumentDto documentDto = implNew.findByUUID(uuids.get(position));
+            implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+
+            uuids.remove("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
         }
 
         if (uuids.size() == 1) {
