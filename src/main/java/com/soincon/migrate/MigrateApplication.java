@@ -128,7 +128,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
             properties.store(propertiesOutputStream, "");
         } catch (IOException e) {
-            System.err.println("Error saving properties: " + e.getMessage());
+            System.err.println("Error guardando las propiedades: " + e.getMessage());
         }
 
         Scanner src = new Scanner(System.in);
@@ -177,14 +177,14 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
         try {
-//            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-//            Thread progressThread = new Thread(progressIndicator);
-//            progressThread.start();
-//            migrateSystem.migrate(pathroot, null, f);
-//            progressIndicator.stop();
-//
-//            System.out.println();
-//            migrateSystem.newMigration(f);
+            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+            Thread progressThread = new Thread(progressIndicator);
+            progressThread.start();
+            migrateSystem.migrate(pathroot, null, f);
+            progressIndicator.stop();
+
+            System.out.println();
+            migrateSystem.newMigration(f);
 
             migrateSystem.config();
         } catch (Exception e) {
