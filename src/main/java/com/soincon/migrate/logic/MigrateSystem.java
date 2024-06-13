@@ -69,14 +69,14 @@ public class MigrateSystem {
 //                    documentDto.setIdParent(docFolderMigration.getIdParent());
 //                }
                 String pathToErase = "";
-                if(directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())){
+                if (directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())) {
                     pathToErase = f.getAbsolutePath();
-                }else{
-                    pathToErase = f.getAbsolutePath()+"\\";
+                } else {
+                    pathToErase = f.getAbsolutePath() + "\\";
                 }
 
                 String mkdPath = directory.getParentFile().getPath().replace(pathToErase, "");
-                mkdPath = mkdPath.replace("\\","/");
+                mkdPath = mkdPath.replace("\\", "/");
 
                 documentDto = implNew.createDocument(documentDto, mkdPath);
 
@@ -84,7 +84,7 @@ public class MigrateSystem {
                     documentDto.setUuid(uuid);
                     documentDto = DocumentService.updateDocument(documentDto);
                 }
-                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                for (File subFile : Objects.requireNonNull(file.listFiles())) {
                     ++currentStep;
                     migrate(subFile.getAbsolutePath(), documentDto, directory);
                 }
@@ -714,16 +714,16 @@ public class MigrateSystem {
      */
     public void checksSGA() throws Exception {
         String sgaUUID;
-        do{
+        do {
             WarningUtil.showWarning("IMPORTANTE",
                     "Introduce el UUID de Visual SGA:");
             sgaUUID = WarningUtil.answer();
-        }while(!isUUID(sgaUUID));
+        } while (!isUUID(sgaUUID));
 
         DocumentDto documentByUUIDDto = implNew.findByUUID(sgaUUID);
 
 
-        if(documentByUUIDDto == null) {
+        if (documentByUUIDDto == null) {
 
             DocumentDto documentDto = new DocumentDto();
             documentDto.setName("Visual SGA");
@@ -732,7 +732,7 @@ public class MigrateSystem {
             documentDto.setUuid(sgaUUID);
 
             DocumentService.updateDocument(documentDto);
-        }else{
+        } else {
             List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
                     null, "Emisuite");
 
@@ -740,7 +740,7 @@ public class MigrateSystem {
 
             File file = new File("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\Emisuite\\" + documentByUUIDDto.getName());
 
-            if(file.renameTo(new File(file.getParentFile()+"\\Visual SGA"))) {
+            if (file.renameTo(new File(file.getParentFile() + "\\Visual SGA"))) {
                 documentByUUIDDto.setName("Visual SGA");
                 implNew.updateDocument(documentByUUIDDto);
             }
@@ -790,7 +790,11 @@ public class MigrateSystem {
 
             if (!answer.equalsIgnoreCase("n")) {
                 if (isUUID(answer)) {
-                    uuids.add(answer);
+                    if (!uuids.contains(answer)) {
+                        uuids.add(answer);
+                    } else {
+                        WarningUtil.showWarning("ERROR", "El UUID ya está en la lista");
+                    }
                 } else {
                     WarningUtil.showWarning("ERROR", "introduce un UUID valido o n para terminar");
                 }
@@ -810,7 +814,7 @@ public class MigrateSystem {
             documentDto.setUuid("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
 
             DocumentService.updateDocument(documentDto);
-        }else{
+        } else {
             int position = uuids.indexOf("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
 
             DocumentDto documentDto = implNew.findByUUID(uuids.get(position));
@@ -835,7 +839,9 @@ public class MigrateSystem {
             for (String UUID : uuids) {
                 if (UUID.equals("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c")) {
                     DocumentDto documentDto = implNew.findByUUID(UUID);
-                    implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+                    if (documentDto != null) {
+                        implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+                    }
                 } else {
 
                     DocumentDto documentByUUIDDto = implNew.findByUUID(UUID);
@@ -847,12 +853,12 @@ public class MigrateSystem {
 //                            implNew.copyDocuments(documentByUUIDDto.getIdDoc(),
 //                                    null, "Emisuite/Digital People");
 ////                        }
-                    }else{
+                    } else {
                         DocumentDto documentDto = new DocumentDto();
                         documentDto.setName("Digital People");
                         documentDto.setTypeDoc("FOLDER");
 
-                        implNew.createDocument(documentDto,"Emisuite/Digital People/dp" + i);
+                        documentDto = implNew.createDocument(documentDto, "Emisuite/Digital People/dp" + i);
 
                         documentDto.setUuid(UUID);
 

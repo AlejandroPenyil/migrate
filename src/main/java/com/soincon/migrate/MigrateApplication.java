@@ -177,14 +177,14 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
         try {
-            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-            Thread progressThread = new Thread(progressIndicator);
-            progressThread.start();
-            migrateSystem.migrate(pathroot, null, f);
-            progressIndicator.stop();
-
-            System.out.println();
-            migrateSystem.newMigration(f);
+//            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+//            Thread progressThread = new Thread(progressIndicator);
+//            progressThread.start();
+//            migrateSystem.migrate(pathroot, null, f);
+//            progressIndicator.stop();
+//
+//            System.out.println();
+//            migrateSystem.newMigration(f);
 
             migrateSystem.config();
         } catch (Exception e) {
