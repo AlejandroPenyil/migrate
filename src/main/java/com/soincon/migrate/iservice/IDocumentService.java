@@ -23,17 +23,17 @@ public interface IDocumentService {
     Call<DocumentDto> getDocument(@Path("id") long id);
 
     @PUT("document/{id}")
-    Call<DocumentDto> updateDocument(@Path("id")long id, @Body DocumentDto documentDto);
+    Call<DocumentDto> updateDocument(@Path("id") long id, @Body DocumentDto documentDto);
 
     @GET("document/searchByPathAndIdParent")
     Call<List<DocumentDto>> searchByPathBase(@Query("pathBase") String PathBase,
                                              @Query("idParent") Integer idParent,
-                                             @Query("isFile")boolean f);
+                                             @Query("isFile") boolean f);
 
     @POST("document/moveDocument")
     Call<List<DocumentDto>> moveDocument(@Query("idTarget") Integer idTarget,
-                                   @Query("pathBase") String pathBase,
-                                   @Body List<Integer> ids);
+                                         @Query("pathBase") String pathBase,
+                                         @Body List<Integer> ids);
 
     @POST("document/copyDocument")
     Call<List<DocumentDto>> copyDocument(@Query("idTarget") Integer idTarget,

@@ -1,6 +1,5 @@
 package com.soincon.migrate.iservice;
 
-import com.soincon.migrate.dto.newDtos.DocumentDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.PathDto;
 import com.soincon.migrate.filter.FilterDirectory;
@@ -32,7 +31,7 @@ public interface DirectoryService {
     Call<PaginatedList<DirectoryDto>> searchDirectoryByFilterAll(@Body FilterDirectory filterDirectory);
 
     @POST("resources/searchByPath")
-    Call<List<DirectoryDto>> searchByPath (@Query("includeResourcePath") boolean iResource,
+    Call<List<DirectoryDto>> searchByPath(@Query("includeResourcePath") boolean iResource,
                                           @Query("includeFileDescendants") boolean iFile,
                                           @Query("includeDirectoryDescendants") boolean iDirectory,
                                           @Query("level") Integer level,

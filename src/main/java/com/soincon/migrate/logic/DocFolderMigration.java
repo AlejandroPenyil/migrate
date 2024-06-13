@@ -24,7 +24,7 @@ public class DocFolderMigration {
         this.documentDto = parent;
 //        this.exist = isExist(file);
 //        if(!this.exist) {
-            this.idParent = parentId(file);
+        this.idParent = parentId(file);
 //        }
 
     }
@@ -34,14 +34,14 @@ public class DocFolderMigration {
         documentDto.setTypeDoc("FOLDER");
         documentDto.setName(file.getParentFile().getName());
 
-        if(this.documentDto != null){
+        if (this.documentDto != null) {
             documentDto.setIdDocument(this.documentDto.getIdDocument());
         }
 
         List<DocumentDto> documentDtos = implNew.search(documentDto);
 
         if (!documentDtos.isEmpty()) {
-            if(documentDtos.size()>1) {
+            if (documentDtos.size() > 1) {
                 for (DocumentDto documentDto2 : documentDtos) {
                     String path = makePath(documentDto2);
 
@@ -49,7 +49,7 @@ public class DocFolderMigration {
                         return documentDto2.getIdDocument();
                     }
                 }
-            }else{
+            } else {
                 return documentDtos.get(0).getIdDocument();
             }
         }
@@ -62,7 +62,7 @@ public class DocFolderMigration {
 
         if (documentDto2.getIdParent() != null) {
             DocumentDto dto = implNew.getDocument(documentDto2.getIdParent());
-            path = Paths.get(makePath(dto),documentDto2.getName());
+            path = Paths.get(makePath(dto), documentDto2.getName());
         } else {
             String currentDirectory = System.getProperty("user.dir");
             path = Paths.get(currentDirectory).getRoot();

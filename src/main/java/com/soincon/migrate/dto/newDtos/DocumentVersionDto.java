@@ -2,8 +2,6 @@ package com.soincon.migrate.dto.newDtos;
 
 import lombok.Data;
 
-import java.time.ZonedDateTime;
-
 @Data
 public class DocumentVersionDto {
     private Long idDocument;

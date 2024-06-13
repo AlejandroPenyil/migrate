@@ -1,8 +1,8 @@
 package com.soincon.migrate.logic;
 
 import com.soincon.migrate.command.WarningUtil;
-import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.newDtos.DocumentDto;
+import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
@@ -16,7 +16,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -13,11 +13,11 @@ public class RetroFitJWT {
 
     public static Retrofit getInstanceRetrofit() throws IOException {
 
-        if (retrofit == null){
+        if (retrofit == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS);
 
 
-            retrofit= new Retrofit.Builder()
+            retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient.build())

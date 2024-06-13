@@ -1,7 +1,6 @@
 package com.soincon.migrate;
 
 import com.soincon.migrate.dto.newDtos.DocumentDto;
-import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.dto.oldDtos.DirectoryDto;
 import com.soincon.migrate.dto.oldDtos.FileDto;
 import com.soincon.migrate.dto.oldDtos.FileTypeDto;
@@ -16,10 +15,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;

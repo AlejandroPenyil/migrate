@@ -1,13 +1,11 @@
 package com.soincon.migrate.updateLogic;
 
 import com.soincon.migrate.dto.newDtos.DocumentDto;
-import org.springframework.core.convert.Property;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class DocumentService {
 

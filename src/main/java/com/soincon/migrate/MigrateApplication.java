@@ -1,9 +1,9 @@
 package com.soincon.migrate;
 
-import com.soincon.migrate.logic.ProgressIndicator;
-import lombok.extern.log4j.Log4j2;
 import com.soincon.migrate.command.WarningUtil;
 import com.soincon.migrate.logic.MigrateSystem;
+import com.soincon.migrate.logic.ProgressIndicator;
+import lombok.extern.log4j.Log4j2;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
@@ -13,7 +13,6 @@ import org.springframework.core.env.Environment;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
@@ -69,7 +68,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     }
 
     /**
-     *  Generar el banner de la aplicación
+     * Generar el banner de la aplicación
      */
     private static class CustomBanner implements Banner {
         @Override
@@ -109,9 +108,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         System.setProperty("api.base.url", api1Url);
         System.setProperty("api2.base.url", api2Url);
-        System.setProperty("spring.datasource.url","jdbc:mysql://"+dbUrl);
-        System.setProperty("spring.datasource.username",user);
-        System.setProperty("spring.datasource.password",password);
+        System.setProperty("spring.datasource.url", "jdbc:mysql://" + dbUrl);
+        System.setProperty("spring.datasource.username", user);
+        System.setProperty("spring.datasource.password", password);
 //        // Establecer nuevas propiedades
 //        properties.setProperty("api.base.url", api1Url);
 //        properties.setProperty("api2.base.url", api2Url);
@@ -135,7 +134,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
 //        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
         String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
-                "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl +"\n");
+                "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl + "\n");
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
             log.info("Usando el path por defecto: {}", pathroot);
@@ -143,11 +142,11 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
 
         File root = new File(pathroot);
-        if(!root.exists()){
+        if (!root.exists()) {
             try {
                 throw new FileNotFoundException();
             } catch (FileNotFoundException e) {
-                WarningUtil.showAlert("ERROR","La ruta por defecto antigua no ha sido encontrada");
+                WarningUtil.showAlert("ERROR", "La ruta por defecto antigua no ha sido encontrada");
                 return;
             }
         }
@@ -155,7 +154,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
 //        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
         String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
-                "Introduce la nueva localizacion root (dejalo vacio para usar el path por defecto):\n" + f +"\n");
+                "Introduce la nueva localizacion root (dejalo vacio para usar el path por defecto):\n" + f + "\n");
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
             log.info("Usando el path por defecto: {}", newRoot);
@@ -202,13 +201,13 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             switch (opc) {
                 case ("y"):
                 case ("Y"):
-                    WarningUtil.showWarning("SEGURO","¿Estas seguro? y/n");
+                    WarningUtil.showWarning("SEGURO", "¿Estas seguro? y/n");
                     src.nextLine();
                     opc = src.next();
                     switch (opc) {
                         case ("y"):
                         case ("Y"):
-                            WarningUtil.showWarning("INFORMACION","Borrando todo ");
+                            WarningUtil.showWarning("INFORMACION", "Borrando todo ");
                             migrateSystem.borrar(pathroot);
                             break;
                         default:

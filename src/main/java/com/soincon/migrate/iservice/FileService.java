@@ -6,7 +6,10 @@ import com.soincon.migrate.dto.oldDtos.PathDto;
 import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.filter.PaginatedList;
 import retrofit2.Call;
-import retrofit2.http.*;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 import java.util.List;
 

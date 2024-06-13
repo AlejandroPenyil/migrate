@@ -46,8 +46,8 @@ public class ProgressIndicator implements Runnable {
         long minutes = (elapsedTimeSeconds % 3600) / 60;
         long seconds = elapsedTimeSeconds % 60;
 
-        String progressBar = WarningUtil.ANSI_GREEN + "█".repeat(Math.max(0, (int) completedBlocks)) +
-                WarningUtil.ANSI_RED + "▒".repeat(Math.max(0, remainingBlocks))+ WarningUtil.ANSI_WHITE +
+        String progressBar = WarningUtil.ANSI_GREEN + "█" + WarningUtil.ANSI_GREEN + "█".repeat(Math.max(0, (int) completedBlocks)) +
+                WarningUtil.ANSI_RED + "▒".repeat(Math.max(0, remainingBlocks)) + WarningUtil.ANSI_GREEN + "█" + WarningUtil.ANSI_WHITE +
                 " " + percentage + "%" +
                 " [" +
                 String.format("%02d:%02d:%02d]", hours, minutes, seconds) + WarningUtil.ANSI_RESET;

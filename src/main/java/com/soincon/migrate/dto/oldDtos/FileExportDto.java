@@ -11,7 +11,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class FileExportDto {
 
-	boolean active;
+    boolean active;
     DownloadDto download;
     String expirationDate; // Date
     String file;
@@ -44,7 +44,6 @@ public class FileExportDto {
 //            "insertDate": "string",
 //            "modificationDate": "string",
 //            "versionLock": 0
-
 
 
 }

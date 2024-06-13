@@ -24,7 +24,7 @@ public class WarningUtil {
 
     // Método para mostrar advertencias con colores
     public static void showWarning(String title, String message) {
-        System.out.println(ANSI_YELLOW + title + ": " + ANSI_RESET+ ANSI_CYAN + message + ANSI_RESET);
+        System.out.println(ANSI_YELLOW + title + ": " + ANSI_RESET + ANSI_CYAN + message + ANSI_RESET);
     }
 
     public static String showWarningAndReadInput(String title, String message) {
@@ -37,7 +37,7 @@ public class WarningUtil {
     }
 
     public static void showAlert(String title, String message) {
-        System.out.println(ANSI_RED + title + ": " + ANSI_YELLOW + message+ ANSI_RESET);
+        System.out.println(ANSI_RED + title + ": " + ANSI_YELLOW + message + ANSI_RESET);
     }
 
     public static String answer() {
@@ -48,7 +48,7 @@ public class WarningUtil {
         return input;
     }
 
-    public static void showError(){
+    public static void showError() {
         System.out.println(ANSI_RED);
         System.out.println("Un error ha ocurrido");
         System.out.println(ANSI_RESET);
