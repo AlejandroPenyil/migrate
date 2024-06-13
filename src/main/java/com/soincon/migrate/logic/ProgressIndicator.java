@@ -1,5 +1,7 @@
 package com.soincon.migrate.logic;
 
+import com.soincon.migrate.command.WarningUtil;
+
 import static com.soincon.migrate.logic.MigrateSystem.currentStep;
 
 public class ProgressIndicator implements Runnable {
@@ -44,11 +46,11 @@ public class ProgressIndicator implements Runnable {
         long minutes = (elapsedTimeSeconds % 3600) / 60;
         long seconds = elapsedTimeSeconds % 60;
 
-        String progressBar = "█".repeat(Math.max(0, (int) completedBlocks)) +
-                " ".repeat(Math.max(0, remainingBlocks)) +
+        String progressBar = WarningUtil.ANSI_GREEN + "█".repeat(Math.max(0, (int) completedBlocks)) +
+                WarningUtil.ANSI_RED + "▒".repeat(Math.max(0, remainingBlocks))+ WarningUtil.ANSI_WHITE +
                 " " + percentage + "%" +
                 " [" +
-                String.format("%02d:%02d:%02d]", hours, minutes, seconds);
+                String.format("%02d:%02d:%02d]", hours, minutes, seconds) + WarningUtil.ANSI_RESET;
 
         System.out.print("\r" + progressBar);
     }
