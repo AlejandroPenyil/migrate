@@ -47,6 +47,15 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     @CommandLine.Option(names = {"-p", "--pass"}, description = "Contraseña de la base de datos", required = true)
     private String password;
 
+    @CommandLine.Option(names = {"-as", "--apis"}, description = "URL base de la API de seguridad", required = true)
+    private String apiSUrl;
+
+    @CommandLine.Option(names = {"-ps", "--passSecurity"}, description = "Contraseña de usuario", required = true)
+    private String passwordSecurity;
+
+    @CommandLine.Option(names = {"-us", "--userSecurity"}, description = "Usuario para acceder a la api de seguridad", required = true)
+    private String userSecurity;
+
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MigrateApplication());
 
@@ -111,6 +120,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.setProperty("spring.datasource.url", "jdbc:mysql://" + dbUrl);
         System.setProperty("spring.datasource.username", user);
         System.setProperty("spring.datasource.password", password);
+        System.setProperty("api.security.base.url", apiSUrl);
+        System.setProperty("api.security.user", userSecurity);
+        System.setProperty("api.security.password", passwordSecurity);
 
         MigrateSystem migrateSystem;
         try {

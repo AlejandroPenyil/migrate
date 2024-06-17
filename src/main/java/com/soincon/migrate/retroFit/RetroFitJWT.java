@@ -4,14 +4,13 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class RetroFitJWT {
     private static Retrofit retrofit;
-    private static String baseUrl = "https://desarrollo.emisuite.es/snc-security-ws/";
+    private static final String baseUrl = System.getProperty("api.security.base.url");
 
-    public static Retrofit getInstanceRetrofit() throws IOException {
+    public static Retrofit getInstanceRetrofit(){
 
         if (retrofit == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS);
