@@ -9,15 +9,11 @@ import java.sql.SQLException;
 
 public class DocumentService {
 
-    private static String URL = System.getProperty("spring.datasource.url");
-    private static String USER = System.getProperty("spring.datasource.username");
-    private static String PASSWORD = System.getProperty("spring.datasource.password");
+    private static final String URL = System.getProperty("spring.datasource.url");
+    private static final String USER = System.getProperty("spring.datasource.username");
+    private static final String PASSWORD = System.getProperty("spring.datasource.password");
 
     public static DocumentDto updateDocument(DocumentDto documentDto) {
-//        URL = System.getProperty("spring.datasource.url");
-//        USER = System.getProperty("spring.datasource.username");
-//        PASSWORD = System.getProperty("spring.datasource.password");
-
         String sql = "UPDATE dmr_documents SET uuid = ? WHERE idDocument = ?";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -27,11 +23,6 @@ public class DocumentService {
             pstmt.setLong(2, documentDto.getIdDocument());
 
             int rowsAffected = pstmt.executeUpdate();
-//            if (rowsAffected > 0) {
-//                System.out.println("Update successful for document with ID: " + documentDto.getIdDocument());
-//            } else {
-//                System.out.println("No document found with ID: " + documentDto.getIdDocument());
-//            }
 
         } catch (SQLException e) {
             e.printStackTrace();

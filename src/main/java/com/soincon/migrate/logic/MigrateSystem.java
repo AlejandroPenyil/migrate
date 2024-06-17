@@ -64,10 +64,7 @@ public class MigrateSystem {
                 documentDto.setName(name);
                 documentDto.setTypeDoc("FOLDER");
 
-//                if (documentDto.getIdParent() == null) {
-//                    documentDto.setIdParent(docFolderMigration.getIdParent());
-//                }
-                String pathToErase = "";
+                String pathToErase;
                 if (directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())) {
                     pathToErase = f.getAbsolutePath();
                 } else {
@@ -81,7 +78,7 @@ public class MigrateSystem {
 
                 if (uuid != null) {
                     documentDto.setUuid(uuid);
-                    documentDto = DocumentService.updateDocument(documentDto);
+                    DocumentService.updateDocument(documentDto);
                 }
                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
                     ++currentStep;
@@ -151,7 +148,7 @@ public class MigrateSystem {
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                             if (uuid != null) {
                                 documentDto.setUuid(uuid);
-                                documentDto = DocumentService.updateDocument(documentDto);
+                                DocumentService.updateDocument(documentDto);
                             }
                             fi++;
                             if (documentDto != null) {
@@ -187,13 +184,6 @@ public class MigrateSystem {
             }
         }
     }
-
-//    private String refactorName(String name) {
-//        name = name.toLowerCase();
-//        name = name.replace("-", " ");
-//        name = name.replace("_", " ");
-//        return name;
-//    }
 
     private boolean folderExist(File file) throws IOException {
         PathDto pathDto = new PathDto();
@@ -318,37 +308,6 @@ public class MigrateSystem {
 
         return idUser;
     }
-
-//    /**
-//     * Metodo para obtener el mimeType de un fichero
-//     *
-//     * @param fullName nombre completo del fichero
-//     * @return el mimetype
-//     * @throws IOException si ocurre algo con los ficheros
-//     */
-//    private String getMimeType(String fullName) throws IOException {
-//        List<FileTypeDto> fileTypeDtos = implOld.getFileTypes();
-//        for (FileTypeDto fileTypeDto : fileTypeDtos) {
-//            File file = new File(fullName);
-//            int lastIndex = file.getName().lastIndexOf('.');
-//            if (lastIndex != -1) {
-//                fullName = file.getName().substring(lastIndex, fullName.length());
-//            }
-//            if (fileTypeDto.getExtension().equals(fullName)) {
-//                lastIndex = fileTypeDto.getMimeType().lastIndexOf('/');
-//                if (lastIndex != -1) {
-//                    fullName = fileTypeDto.getMimeType().substring(0, lastIndex) + "/" + fileTypeDto.getName();
-//                }
-//                return fullName;
-//
-//            } else if (fullName.equals(".jpeg")) {
-//                if (fileTypeDto.getExtension().equals(".jpg")) {
-//                    return fileTypeDto.getMimeType();
-//                }
-//            }
-//        }
-//        return "";
-//    }
 
     /**
      * Metodo que le pone una extension a un fichero si este no tiene una
@@ -608,7 +567,7 @@ public class MigrateSystem {
             documentDto1.setName("Visual Tracking");
             documentDto1.setTypeDoc("FOLDER");
 
-            documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
+            implNew.createDocument(documentDto1, "Emisuite");
         }
 
         old = new File(s + "\\1\\easy-gmao");
@@ -669,15 +628,6 @@ public class MigrateSystem {
     private long buscar(File old) throws IOException {
         return implNew.searchByPathName(old).get(0).getIdDocument();
     }
-
-//    private void crearNew(File neu, DocumentDto documenDto) throws Exception {
-//        DocumentDto documentDto = new DocumentDto();
-//
-//        documentDto.setName(neu.getName());
-//        documentDto.setIdParent(documenDto.getIdDocument());
-//
-//        implNew.createDocument(documentDto, neu.getAbsolutePath());
-//    }
 
     /**
      * METHOD TO UPDATE THE FOLDER IN EMISUITE
@@ -848,10 +798,6 @@ public class MigrateSystem {
                     if (documentByUUIDDto != null) {
                         List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
                                 null, "Emisuite/Digital People/dp" + i);
-////                        if(documentDtoList == null){
-//                            implNew.copyDocuments(documentByUUIDDto.getIdDoc(),
-//                                    null, "Emisuite/Digital People");
-////                        }
                     } else {
                         DocumentDto documentDto = new DocumentDto();
                         documentDto.setName("Digital People");

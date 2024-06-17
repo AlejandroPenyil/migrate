@@ -111,10 +111,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.setProperty("spring.datasource.url", "jdbc:mysql://" + dbUrl);
         System.setProperty("spring.datasource.username", user);
         System.setProperty("spring.datasource.password", password);
-//        // Establecer nuevas propiedades
-//        properties.setProperty("api.base.url", api1Url);
-//        properties.setProperty("api2.base.url", api2Url);
-//        log.info("Properties updated with new values: {}, {}", properties.getProperty("api.base.url"), properties.getProperty("api2.base.url"));
 
         MigrateSystem migrateSystem;
         try {
@@ -253,85 +249,5 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
     @Override
     public void run(String... args) {
-/*
-        if (args.length >= 2) {
-            System.out.print("---------------------------------" +
-                    "\n|  *******IMPORTANTE*******     |" +
-                    "\n| Este programa hara cambios en |" +
-                    "\n| el sitema de archivos y no se |" +
-                    "\n| podran recuperar              |" +
-                    "\n---------------------------------\n");
-            Properties properties = new Properties();
-            String propertiesFilePath = "src/main/resources/application.properties";
-
-            // Cargar las propiedades desde un archivo en el sistema de archivos
-            try (FileInputStream propertiesStream = new FileInputStream(propertiesFilePath)) {
-                properties.load(propertiesStream);
-            } catch (IOException e) {
-                System.err.println("Error cargando las propiedades: " + e.getMessage());
-                return;
-            }
-
-            // Establecer nuevas propiedades
-            properties.setProperty("api.base.url", args[1]);
-            properties.setProperty("api2.base.url", args[0]);
-            System.out.println("Propiedades actualizadas con nuevos valores." + properties.getProperty("api.base.url") + properties.getProperty("api2.base.url"));
-
-            MigrateSystem migrateSystem = new MigrateSystem();
-
-            // Guardar las propiedades en el archivo
-            try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
-                properties.store(propertiesOutputStream, "Actualizada la base de datos");
-            } catch (IOException e) {
-                System.err.println("Error guardando las propiedades: " + e.getMessage());
-            }
-
-            log.info("Empezando a migrar t0do a esta ubicacion " + f.getAbsolutePath());
-
-            Scanner src = new Scanner(System.in);
-            System.out.println("Pasa la ubicacion de root para limpiar");
-            String pathroot = src.nextLine();
-            System.out.println("Escribe la nueva ubicacion de root");
-            String newRoot = src.nextLine();
-
-            f = new File(newRoot);
-
-            f.mkdir();
-
-            migrateSystem.cleanRoot(pathroot, newRoot);
-
-
-            log.info("Modificando a migrar tod0 de esta ubicacion " + pathroot);
-            log.info("Esto llevara un rato...");
-            migrateSystem.migrate(pathroot, null, f);
-            log.info(fi);
-
-
-
-            System.out.println("-------------------------------------------------------------");
-            System.out.println("|                       ***ALERTA***                        |");
-            System.out.println("| Quieres borrar las carpetas del root Antiguo antiguas S/N |");
-            System.out.println("|       Si lo borras no lo podras recuperar más tarde       |");
-            System.out.println("-------------------------------------------------------------");
-            String opc = src.next();
-            boolean t = false;
-            do {
-                switch (opc) {
-                    case ("s"):
-                    case ("S"):
-                        migrateSystem.borrar(pathroot);
-                        break;
-                    case ("n"):
-                    case ("N"):
-                        System.out.println("Terminando el programa");
-                        break;
-                    default:
-                        System.out.println("Elige una opcion S/N");
-                        t = true;
-                        break;
-                }
-            } while (t);
-        }
-        System.out.println("Programa terminado");*/
     }
 }
