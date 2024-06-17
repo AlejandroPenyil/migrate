@@ -28,11 +28,13 @@ public class WarningUtil {
     }
 
     public static String showWarningAndReadInput(String title, String message) {
+        System.out.println();
         Scanner scanner = new Scanner(System.in);
         System.out.print(ANSI_YELLOW + title + ": " + ANSI_RESET + ANSI_CYAN + message + ANSI_RESET);
         System.out.print(ANSI_GREEN);  // Cambia el color antes de la entrada del usuario
         String input = scanner.nextLine();
-        System.out.print(ANSI_RESET);  // Resetea el color después de la entrada del usuario
+        System.out.print(ANSI_RESET);
+        System.out.println();// Resetea el color después de la entrada del usuario
         return input;
     }
 
