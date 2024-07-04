@@ -6,7 +6,6 @@ import com.soincon.migrate.logic.ProgressIndicator;
 import lombok.extern.log4j.Log4j2;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 
@@ -73,9 +72,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             commandLine.execute(args);
             return; // Salir sin ejecutar la aplicación Spring Boot
         }
-
-        // Lanzar la aplicación Spring Boot
-        SpringApplication app = new SpringApplication(MigrateApplication.class);
 
         // Ejecutar el comando PicoCLI
         int exitCode = commandLine.execute(args);
