@@ -1,4 +1,4 @@
-package com.soincon.migrate.updateLogic;
+package com.soincon.migrate.logic;
 
 import com.soincon.migrate.dto.newDtos.DocumentDto;
 
