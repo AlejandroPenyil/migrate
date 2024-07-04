@@ -5,11 +5,9 @@ import com.soincon.migrate.logic.MigrateSystem;
 import com.soincon.migrate.logic.ProgressIndicator;
 import lombok.extern.log4j.Log4j2;
 import org.fusesource.jansi.AnsiConsole;
-import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.env.Environment;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -78,29 +76,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         // Lanzar la aplicación Spring Boot
         SpringApplication app = new SpringApplication(MigrateApplication.class);
-        app.setBanner(new CustomBanner());
-        app.run(args);
-
 
         // Ejecutar el comando PicoCLI
         int exitCode = commandLine.execute(args);
         System.exit(exitCode);
-    }
-
-    /**
-     * Generar el banner de la aplicación
-     */
-    private static class CustomBanner implements Banner {
-        @Override
-        public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
-            try {
-                String bannerText = "";
-
-                out.println(bannerText);
-            } catch (Exception e) {
-                out.println("Error al generar el banner: " + e.getMessage());
-            }
-        }
     }
 
     /**
@@ -109,7 +88,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     @Override
     public void run() {
         WarningUtil.showAlert("ALERTA", "Este programa puede hacer cambios que no se podran desacer.");
-
 
         Properties properties = new Properties();
         String propertiesFilePath = "application.properties";
