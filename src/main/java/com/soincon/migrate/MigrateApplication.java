@@ -120,7 +120,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
             properties.store(propertiesOutputStream, "");
         } catch (IOException e) {
-            System.err.println("Error guardando las propiedades: " + e.getMessage());
+            log.error("Error guardando las propiedades: {}", e.getMessage());
         }
 
         Scanner src = new Scanner(System.in);
@@ -130,7 +130,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                 "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl + "\n");
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
-            log.info("Usando el path por defecto: {}", pathroot);
+            WarningUtil.showWarning("Usando el path por defecto: {}", pathroot);
         }
 
 
@@ -150,12 +150,14 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                 "Introduce la nueva localizacion root (dejalo vacio para usar el path por defecto):\n" + f + "\n");
         if (newRoot.isEmpty()) {
             newRoot = f.getAbsolutePath();
-            log.info("Usando el path por defecto: {}", newRoot);
+            WarningUtil.showWarning("Usando el path por defecto: {}", newRoot);
         }
 
 
         f = new File(newRoot);
-        f.mkdirs();
+        if(f.mkdirs()){
+            log.info("created: {}", f.getAbsolutePath());
+        }
 
         try {
             migrateSystem.cleanRoot(pathroot, newRoot);
