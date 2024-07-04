@@ -542,6 +542,7 @@ public class MigrateSystem {
 
         if (old.exists()) {
             long id = find(old);
+            log.info("{} find, now moving to {}",old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
 
             old = new File(file.getAbsolutePath() + File.separator + "vt");
@@ -549,6 +550,7 @@ public class MigrateSystem {
                 updateNew((int) id, "Visual Tracking");
             }
         } else {
+            log.info("{} not find, now creating to {}",old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Visual Tracking");
             documentDto1.setTypeDoc("FOLDER");
@@ -561,12 +563,14 @@ public class MigrateSystem {
 
         if (old.exists()) {
             long id = find(old);
+            log.info("{} find, now moving to {}",old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator +"easy-gmao");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "Easy GMAO");
             }
         } else {
+            log.info("{} not find, now creating to {}",old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Easy GMAO");
             documentDto1.setTypeDoc("FOLDER");
@@ -583,12 +587,14 @@ public class MigrateSystem {
 
         if (old.exists()) {
             long id = find(old);
+            log.info("{} find, now moving to {}",old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator+"my-factory");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "My Factory");
             }
         } else {
+            log.info("{} not find, now creating to {}",old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("My Factory");
             documentDto1.setTypeDoc("FOLDER");
