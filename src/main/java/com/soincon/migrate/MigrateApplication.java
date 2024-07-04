@@ -167,8 +167,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        log.info("Modificando todo de: {}", pathroot);
-        log.info("Esto llevara un rato...");
+        WarningUtil.showWarning("","\rModificando todo de: " + pathroot);
+        WarningUtil.showWarning("","\rEsto llevara un rato...");
 
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
@@ -187,7 +187,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
         System.out.println();
-        log.info("Migracion completada.");
+        WarningUtil.showWarning("","\rMigracion completada.");
 
         WarningUtil.showAlert("ALERTA", "¿Quieres borrar todos los archivos del root antiguo? si lo borras " +
                 "no lo podras recuperar mas tarde. Y/N");
@@ -214,16 +214,16 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     break;
                 case ("n"):
                 case ("N"):
-                    log.info("Terminando el programa");
+                    WarningUtil.showWarning("","\rTerminando el programa");
                     t = false;
                     break;
                 default:
-                    log.info("Elige una opcion Y/N");
+                    WarningUtil.showAlert("","\rElige una opcion Y/N");
                     t = true;
                     break;
             }
         } while (t);
-        log.info("Programa terminado");
+        WarningUtil.showWarning("","\rPrograma terminado");
         AnsiConsole.systemUninstall();
 
     }
