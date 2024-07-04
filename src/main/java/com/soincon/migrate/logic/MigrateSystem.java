@@ -53,12 +53,8 @@ public class MigrateSystem {
         if (file.isDirectory()) {
             String name = file.getName();
             File directory = Paths.get(String.valueOf(newPath), name).toFile();
-//            DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
             if (folderExist(file)) {
 
-//                directory.mkdirs();
-
-//                if (!docFolderMigration.isExist()) {
                 DocumentDto documentDto = new DocumentDto();
                 documentDto.setName(name);
                 documentDto.setTypeDoc("FOLDER");
@@ -83,12 +79,7 @@ public class MigrateSystem {
                     ++currentStep;
                     migrate(subFile.getAbsolutePath(), documentDto, directory);
                 }
-////                } /*else {
-//                    for (File subFile : Objects.requireNonNull(file.listFiles())) {
-//                        ++currentStep;
-//                        migrate(subFile.getAbsolutePath(), docFolderMigration.getDocumentDto(), directory);
-//                    }
-//                }*/
+
             } else {
                 DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
@@ -113,8 +104,6 @@ public class MigrateSystem {
                 File directory = Paths.get(String.valueOf(newPath), file.getName()).toFile();
                 if (!directory.exists()) {
                     FileUtils.copyFile(file, directory);
-//                    file.renameTo(directory);
-
 
                     DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                     int i = 1;
@@ -651,7 +640,6 @@ public class MigrateSystem {
     public void config() throws Exception {
         WarningUtil.showWarning("IMPORTANTE", "Ten el archivo config.json abierto, se te va a preguntar por informacion contenida en el mismo");
 
-//        checksSGA();
         checkDP();
     }
 
