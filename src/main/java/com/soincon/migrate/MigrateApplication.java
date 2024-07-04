@@ -16,7 +16,8 @@ import java.util.Scanner;
 
 /**
  * Introducir como variables:
- * Api nueva, api antigua
+ * Api nueva, api antigua, url base de datos, usuario base de datos, contraseña base de datos, api de seguridad,
+ * usuario api de seguridad, contraseña api de seguridad
  */
 
 @SpringBootApplication
