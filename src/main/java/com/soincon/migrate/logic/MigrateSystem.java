@@ -68,11 +68,11 @@ public class MigrateSystem {
                 if (directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())) {
                     pathToErase = f.getAbsolutePath();
                 } else {
-                    pathToErase = f.getAbsolutePath() + "\\";
+                    pathToErase = f.getAbsolutePath() + File.separator;
                 }
 
                 String mkdPath = directory.getParentFile().getPath().replace(pathToErase, "");
-                mkdPath = mkdPath.replace("\\", "/");
+                mkdPath = mkdPath.replace(File.separator, "/");
 
                 documentDto = implNew.createDocument(documentDto, mkdPath);
 
@@ -97,7 +97,7 @@ public class MigrateSystem {
                 boolean t = true;
                 int i = 0;
                 do {
-                    file2 = new File(file2 + "\\" + i + name);
+                    file2 = new File(file2 + File.separator + i + name);
                     if (file2.mkdir()) {
                         t = false;
                     } else {
@@ -137,7 +137,7 @@ public class MigrateSystem {
                     String name = quitarExtension(directory);
                     do {
                         String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                        File file2 = new File(directory.getParentFile().getPath() + "\\" + fullName);
+                        File file2 = new File(directory.getParentFile().getPath() + File.separator + fullName);
                         if (directory.renameTo(file2)) {
                             tr = true;
                             DocumentDto documentDto = new DocumentDto();
@@ -167,7 +167,7 @@ public class MigrateSystem {
                 boolean t = true;
                 int i = 0;
                 do {
-                    File file2 = new File(directry + "\\" + i + file.getName());
+                    File file2 = new File(directry + File.separator + i + file.getName());
                     if (!file2.exists()) {
                         try {
                             FileUtils.copyFile(file, file2);
@@ -329,7 +329,7 @@ public class MigrateSystem {
                 List<FileTypeDto> fileTypeDtos = implOld.getFileTypes();
                 for (FileTypeDto fileTypeDto : fileTypeDtos) {
                     if (fileTypeDto.getMimeType().equals(fileDto.getMimeType())) {
-                        file = new File(file.getParentFile().getPath() + "\\" + file.getName() + fileTypeDto.getExtension());
+                        file = new File(file.getParentFile().getPath() + File.separator + file.getName() + fileTypeDto.getExtension());
                         break;
                     }
                 }
@@ -384,7 +384,7 @@ public class MigrateSystem {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
                             file2.mkdirs();
-                            file2 = new File(file2 + "\\" + file.getName());
+                            file2 = new File(file2 + File.separator + file.getName());
                             if (!file2.exists()) {
                                 FileUtils.copyFile(file, file2);
                             } else {
@@ -404,7 +404,7 @@ public class MigrateSystem {
                                 String name = quitarExtension(directory);
                                 do {
                                     String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                                    file2 = new File(file2 + "\\" + fullName);
+                                    file2 = new File(file2 + File.separator + fullName);
                                     if (!file2.exists()) {
                                         FileUtils.copyFile(directory, file2);
                                         if (file2.exists()) {
@@ -433,7 +433,7 @@ public class MigrateSystem {
                             String name = quitarExtension(directory);
                             do {
                                 String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
-                                file2 = new File(file2 + "\\" + fullName);
+                                file2 = new File(file2 + File.separator + fullName);
                                 if (!file2.exists()) {
                                     FileUtils.copyFile(directory, file2);
                                     if (file2.exists()) {
@@ -456,12 +456,12 @@ public class MigrateSystem {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
                             file2.mkdirs();
-                            file = new File(file2 + "\\" + file.getName());
+                            file = new File(file2 + File.separator + file.getName());
                             file.mkdir();
                         } else {
                             file2.mkdir();
 
-                            file2 = new File(file2 + "\\" + file.getName());
+                            file2 = new File(file2 + File.separator + file.getName());
                             if (file2.mkdir()) {
 
                                 DocumentDto documentDto1 = new DocumentDto();
@@ -507,17 +507,17 @@ public class MigrateSystem {
     }
 
     public void newMigration(File f) throws Exception {
-        File file = new File(f.getAbsolutePath() + "\\Emisuite");
+        File file = new File(f.getAbsolutePath() + File.separator +"Emisuite");
         if (file.exists()) {
             DocumentDto documentDto = findDocument(file);
-            moveToEmisuite(f.getAbsolutePath() + "\\clients", file);
+            moveToEmisuite(f.getAbsolutePath() + File.separator +"clients", file);
         } else {
             DocumentDto documentDto = new DocumentDto();
             documentDto.setTypeDoc("FOLDER");
             documentDto.setName(file.getName());
             implNew.createDocument(documentDto, "");
 
-            moveToEmisuite(f.getAbsolutePath() + "\\clients", file);
+            moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
         }
     }
 
@@ -551,14 +551,14 @@ public class MigrateSystem {
      * @throws Exception IF ANY ERROR OCCUR WITH RETROFIT
      */
     private void moveToEmisuite(String s, File file) throws Exception {
-        File old = new File(s + "\\1\\vt");
-        File neu = new File(file.getAbsolutePath() + "\\Visual Tracking");
+        File old = new File(s + File.separator+ "1" + File.separator +"vt");
+        File neu = new File(file.getAbsolutePath() + File.separator +"Visual Tracking");
 
         if (old.exists()) {
             long id = buscar(old);
             implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
 
-            old = new File(file.getAbsolutePath() + "\\vt");
+            old = new File(file.getAbsolutePath() + File.separator + "vt");
             if (old.renameTo(neu)) {
                 actualizarNew((int) id, "Visual Tracking");
             }
@@ -570,13 +570,13 @@ public class MigrateSystem {
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(s + "\\1\\easy-gmao");
-        neu = new File(file.getAbsolutePath() + "\\Easy GMAO");
+        old = new File(s + File.separator+"1"+File.separator+"easy-gmao");
+        neu = new File(file.getAbsolutePath() + File.separator+"Easy GMAO");
 
         if (old.exists()) {
             long id = buscar(old);
             implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
-            old = new File(file.getAbsolutePath() + "\\easy-gmao");
+            old = new File(file.getAbsolutePath() + File.separator +"easy-gmao");
             if (old.renameTo(neu)) {
                 actualizarNew((int) id, "Easy GMAO");
             }
@@ -592,13 +592,13 @@ public class MigrateSystem {
             DocumentService.updateDocument(documentDto1);
         }
 
-        old = new File(s + "\\clientid-1\\my-factory");
-        neu = new File(file.getAbsolutePath() + "\\My Factory");
+        old = new File(s + File.separator+"clientid-1"+File.separator+"my-factory");
+        neu = new File(file.getAbsolutePath() + File.separator+"My Factory");
 
         if (old.exists()) {
             long id = buscar(old);
             implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
-            old = new File(file.getAbsolutePath() + "\\my-factory");
+            old = new File(file.getAbsolutePath() + File.separator+"my-factory");
             if (old.renameTo(neu)) {
                 actualizarNew((int) id, "My Factory");
             }
@@ -687,9 +687,16 @@ public class MigrateSystem {
 
             documentByUUIDDto = implNew.getDocument(documentByUUIDDto.getIdDoc());
 
-            File file = new File("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest\\Emisuite\\" + documentByUUIDDto.getName());
+            File file = new File(System.getProperty("user.home")
+                    +File.separator+"Soincon"
+                    +File.separator+"EMI"
+                    +File.separator+"Cross-Solutions"
+                    +File.separator+"Documents"
+                    +File.separator+"RepoTest"
+                    +File.separator+"Emisuite"
+                    +File.separator+ documentByUUIDDto.getName());
 
-            if (file.renameTo(new File(file.getParentFile() + "\\Visual SGA"))) {
+            if (file.renameTo(new File(file.getParentFile() + File.separator+"Visual SGA"))) {
                 documentByUUIDDto.setName("Visual SGA");
                 implNew.updateDocument(documentByUUIDDto);
             }
@@ -703,10 +710,21 @@ public class MigrateSystem {
     private void copySGA() {
         try {
             WarningUtil.showWarning("Importante".toUpperCase(), "Donde esta la carpeta con el contenido que quieres mover, " +
-                    "ten en cuenta que ahora todo esta en: \nC:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest ");
+                    "ten en cuenta que ahora todo esta en: \n"
+            +System.getProperty("user.home")
+                    +File.separator+"Soincon"
+                    +File.separator+"EMI"
+                    +File.separator+"Cross-Solutions"
+                    +File.separator+"Documents"
+                    +File.separator+"RepoTest");
             String answer = WarningUtil.answer();
             List<DocumentDto> documentDtoList = implNew.searchByPath(answer.
-                    replace("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest", ""));
+                    replace(System.getProperty("user.home")
+                            +File.separator+"Soincon"
+                            +File.separator+"EMI"
+                            +File.separator+"Cross-Solutions"
+                            +File.separator+"Documents"
+                            +File.separator+"RepoTest", ""));
 
             DocumentDto SGAdocument = new DocumentDto();
             SGAdocument.setName("Visual SGA");

@@ -29,8 +29,19 @@ import java.util.Scanner;
 public class MigrateApplication implements CommandLineRunner, Runnable {
     public static int totalFilesAndDirectories;
 
-    public static File f = new File("C:\\Soincon\\EMI\\Cross-Solutions\\Documents\\RepoTest");
-    private File odl = new File("c:\\opt\\tools\\tomcat\\latest\\files\\clients");
+    public static File f = new File(File.listRoots()[0].getPath()
+            +File.separator+"Soincon"
+            +File.separator+"EMI"
+            +File.separator+"Cross-Solutions"
+            +File.separator+"Documents"
+            +File.separator+"RepoTest");
+    private File odl = new File(File.listRoots()[0].getPath()
+            +File.separator+"opt"
+            +File.separator+"tools"
+            +File.separator+"tomcat"
+            +File.separator+"latest"
+            +File.separator+"files"
+            +File.separator+"clients");
 
     @CommandLine.Option(names = {"-a1", "--api1"}, description = "URL base para la API de la que se va a migrar", required = true)
     private String api1Url;
