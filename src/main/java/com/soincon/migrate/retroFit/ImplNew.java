@@ -5,7 +5,7 @@ import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
 import com.soincon.migrate.iservice.Autorithation;
 import com.soincon.migrate.iservice.IDocumentService;
 import com.soincon.migrate.iservice.IDocumentVersionService;
-import com.soincon.migrate.security.AutentecationUser;
+import com.soincon.migrate.security.AuthenticationUser;
 import com.soincon.migrate.security.Token;
 import lombok.extern.log4j.Log4j2;
 import retrofit2.Call;
@@ -25,8 +25,8 @@ public class ImplNew {
 
     public ImplNew() throws IOException {
         autorithation = RetroFitJWT.getInstanceRetrofit().create(Autorithation.class);
-        AutentecationUser autentecationUser = new AutentecationUser();
-        Call<Token> call = autorithation.findFiles(autentecationUser);
+        AuthenticationUser authenticationUser = new AuthenticationUser();
+        Call<Token> call = autorithation.findFiles(authenticationUser);
         Response<Token> response = call.execute();
         Token token = response.body();
         Jwtoken = token;
