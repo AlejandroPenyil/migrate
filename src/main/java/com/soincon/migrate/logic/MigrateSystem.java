@@ -169,6 +169,7 @@ public class MigrateSystem {
                             log.error("Cannot create {}", file2);
                         }
                         if (file2.exists()) {
+                            log.info("copy file: {}",file2.getAbsolutePath());
                             t = false;
                         }
                     }
