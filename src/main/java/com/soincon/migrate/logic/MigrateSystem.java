@@ -377,7 +377,9 @@ public class MigrateSystem {
                         if (!exists(file)) {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
-                            file2.mkdirs();
+                            if(file2.mkdirs()){
+                                log.info("created: {}", file2.getAbsolutePath());
+                            }
                             file2 = new File(file2 + File.separator + file.getName());
                             if (!file2.exists()) {
                                 FileUtils.copyFile(file, file2);
@@ -409,7 +411,9 @@ public class MigrateSystem {
                                 } while (!tr);
                             }
                         } else {
-                            file2.mkdir();
+                            if(file2.mkdir()){
+                                log.info("created: {}", file2.getPath());
+                            }
                             int i = 1;
                             boolean tr = false;
 
@@ -449,11 +453,17 @@ public class MigrateSystem {
                         if (!exists(file)) {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
-                            file2.mkdirs();
+                            if(file2.mkdirs()){
+                                log.info("created: {}", file2.getPath());
+                            }
                             file = new File(file2 + File.separator + file.getName());
-                            file.mkdir();
+                            if(file.mkdir()){
+                                log.info("created: {}", file.getPath());
+                            }
                         } else {
-                            file2.mkdir();
+                            if(file2.mkdir()){
+                                log.info("created: {}", file2.getPath());
+                            }
 
                             file2 = new File(file2 + File.separator + file.getName());
                             if (file2.mkdir()) {
