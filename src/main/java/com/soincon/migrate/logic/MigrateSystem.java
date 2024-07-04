@@ -530,28 +530,6 @@ public class MigrateSystem {
     }
 
     /**
-     * @param file THE FILE TO FIND IN DATA BASE
-     * @return THE DOCUMENT
-     * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
-     */
-    private DocumentDto findDocument(File file) throws IOException {
-        DocumentDto documentDto = new DocumentDto();
-
-        documentDto.setName(file.getName());
-        documentDto.setTypeDoc("FOLDER");
-
-        List<DocumentDto> documentDtoList = implNew.search(documentDto);
-
-        for (DocumentDto documentDto1 : documentDtoList) {
-            if (documentDto1.getName().equals(file.getName()) && documentDto1.getIdParent() == null) {
-                return documentDto1;
-            }
-        }
-
-        return documentDto;
-    }
-
-    /**
      * METHOD TO MOVE THE MAIN FOLDERS TO EMISUITE
      *
      * @param s    PATH OF THE FOLDERS
@@ -664,89 +642,6 @@ public class MigrateSystem {
     }
 
     /**
-     * METHOD TO DO ALL THE CHECKS OF VISUAL SGA
-     *
-     * @throws Exception IF ANY METHOD OF RETROFIT FAIL
-     */
-    public void checksSGA() throws Exception {
-        String sgaUUID;
-        do {
-            WarningUtil.showWarning("IMPORTANTE",
-                    "Introduce el UUID de Visual SGA:");
-            sgaUUID = WarningUtil.answer();
-        } while (!isUUID(sgaUUID));
-
-        DocumentDto documentByUUIDDto = implNew.findByUUID(sgaUUID);
-
-
-        if (documentByUUIDDto == null) {
-
-            DocumentDto documentDto = new DocumentDto();
-            documentDto.setName("Visual SGA");
-            documentDto.setTypeDoc("FOLDER");
-            documentDto = implNew.createDocument(documentDto, "Emisuite");
-            documentDto.setUuid(sgaUUID);
-
-            DocumentService.updateDocument(documentDto);
-        } else {
-            List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
-                    null, "Emisuite");
-
-            documentByUUIDDto = implNew.getDocument(documentByUUIDDto.getIdDoc());
-
-            File file = new File(System.getProperty("user.home")
-                    +File.separator+"Soincon"
-                    +File.separator+"EMI"
-                    +File.separator+"Cross-Solutions"
-                    +File.separator+"Documents"
-                    +File.separator+"RepoTest"
-                    +File.separator+"Emisuite"
-                    +File.separator+ documentByUUIDDto.getName());
-
-            if (file.renameTo(new File(file.getParentFile() + File.separator+"Visual SGA"))) {
-                documentByUUIDDto.setName("Visual SGA");
-                implNew.updateDocument(documentByUUIDDto);
-            }
-        }
-
-    }
-
-    /**
-     * Method to copy content FROM SGA to the that are indicated previously
-     */
-    private void copySGA() {
-        try {
-            WarningUtil.showWarning("Importante".toUpperCase(), "Donde esta la carpeta con el contenido que quieres mover, " +
-                    "ten en cuenta que ahora todo esta en: \n"
-            +System.getProperty("user.home")
-                    +File.separator+"Soincon"
-                    +File.separator+"EMI"
-                    +File.separator+"Cross-Solutions"
-                    +File.separator+"Documents"
-                    +File.separator+"RepoTest");
-            String answer = WarningUtil.answer();
-            List<DocumentDto> documentDtoList = implNew.searchByPath(answer.
-                    replace(System.getProperty("user.home")
-                            +File.separator+"Soincon"
-                            +File.separator+"EMI"
-                            +File.separator+"Cross-Solutions"
-                            +File.separator+"Documents"
-                            +File.separator+"RepoTest", ""));
-
-            DocumentDto SGAdocument = new DocumentDto();
-            SGAdocument.setName("Visual SGA");
-            SGAdocument.setTypeDoc("FOLDER");
-            SGAdocument = implNew.createDocument(SGAdocument, "Emisuite");
-
-            implNew.moveDocuments(Math.toIntExact(documentDtoList.get(0).getIdDocument()),
-                    Math.toIntExact(SGAdocument.getIdDocument()), null);
-        } catch (Exception ex) {
-            WarningUtil.showError();
-            copySGA();
-        }
-    }
-
-    /**
      * METHOD TO DO ALL CHECKS OF DIGITAL PEOPLE
      *
      * @throws Exception IF ANY METHOD OF RETROFIT FAIL
@@ -821,7 +716,7 @@ public class MigrateSystem {
                     DocumentDto documentByUUIDDto = implNew.findByUUID(UUID);
 
                     if (documentByUUIDDto != null) {
-                        List<DocumentDto> documentDtoList = implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
+                        implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
                                 null, "Emisuite/Digital People/dp" + i);
                     } else {
                         DocumentDto documentDto = new DocumentDto();
