@@ -86,21 +86,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     public void run() {
         WarningUtil.showAlert("ALERTA", "Este programa puede hacer cambios que no se podran desacer.");
 
-        Properties properties = new Properties();
-        String propertiesFilePath = "application.properties";
-
-        // Cargar las propiedades desde un archivo en el sistema de archivos
-        try (InputStream inputStream = MigrateApplication.class.getClassLoader().getResourceAsStream(propertiesFilePath)) {
-            if (inputStream != null) {
-                properties.load(inputStream);
-            } else {
-                log.error("File not found: {}", propertiesFilePath);
-            }
-        } catch (IOException e) {
-            log.error("Error loading properties: {}", e.getMessage());
-            return;
-        }
-
         System.setProperty("api.base.url", api1Url);
         System.setProperty("api2.base.url", api2Url);
         System.setProperty("spring.datasource.url", "jdbc:mysql://" + dbUrl);
@@ -115,13 +100,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             migrateSystem = new MigrateSystem();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        // Guardar las propiedades en el archivo
-        try (FileOutputStream propertiesOutputStream = new FileOutputStream(propertiesFilePath)) {
-            properties.store(propertiesOutputStream, "");
-        } catch (IOException e) {
-            log.error("Error guardando las propiedades: {}", e.getMessage());
         }
 
         Scanner src = new Scanner(System.in);
