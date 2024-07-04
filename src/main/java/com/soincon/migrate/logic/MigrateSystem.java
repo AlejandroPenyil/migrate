@@ -83,12 +83,16 @@ public class MigrateSystem {
             } else {
                 DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
-                file2.mkdir();
+                if(file2.mkdir()){
+                    log.info("crated {}", file2.getAbsolutePath());
+                }
+
                 boolean t = true;
                 int i = 0;
                 do {
-                    file2 = new File(file2 + File.separator + i + name);
-                    if (file2.mkdir()) {
+                    File nfDirectory = new File(file2 + File.separator + i + "-" + name);
+                    if (nfDirectory.mkdir()) {
+                        log.info("{} added to not found", nfDirectory.getName());
                         t = false;
                     } else {
                         i++;
@@ -493,7 +497,11 @@ public class MigrateSystem {
                 delete(subFile.getPath());
             }
         }
-        file.delete();
+        if(file.delete()){
+            log.info("delete has been completed successfully");
+        }else{
+            log.error("An error has occurred and the deletion of {} could not be completed", file.getAbsolutePath());
+        }
     }
 
     public void newMigration(File f) throws Exception {
