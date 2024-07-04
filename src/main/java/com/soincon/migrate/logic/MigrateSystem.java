@@ -150,12 +150,14 @@ public class MigrateSystem {
                     } while (!tr);
                 }
             } else {
-                File directry = Paths.get(String.valueOf(f), "notfound").toFile();
-                directry.mkdir();
+                File directory = Paths.get(String.valueOf(f), "notfound").toFile();
+                if(directory.mkdir()){
+                    log.info("created {}", directory.getAbsolutePath());
+                }
                 boolean t = true;
                 int i = 0;
                 do {
-                    File file2 = new File(directry + File.separator + i + file.getName());
+                    File file2 = new File(directory + File.separator + i + "-" + file.getName());
                     if (!file2.exists()) {
                         try {
                             FileUtils.copyFile(file, file2);
@@ -497,7 +499,7 @@ public class MigrateSystem {
     public void newMigration(File f) throws Exception {
         File file = new File(f.getAbsolutePath() + File.separator +"Emisuite");
         if (file.exists()) {
-            DocumentDto documentDto = findDocument(file);
+//            DocumentDto documentDto = findDocument(file);
             moveToEmisuite(f.getAbsolutePath() + File.separator +"clients", file);
         } else {
             DocumentDto documentDto = new DocumentDto();
@@ -532,7 +534,7 @@ public class MigrateSystem {
     }
 
     /**
-     * METHO TO MOVE THE MAIN FOLDERS TO EMISUITE
+     * METHOD TO MOVE THE MAIN FOLDERS TO EMISUITE
      *
      * @param s    PATH OF THE FOLDERS
      * @param file NEW PATH OF THE FOLDERS
@@ -543,12 +545,12 @@ public class MigrateSystem {
         File neu = new File(file.getAbsolutePath() + File.separator +"Visual Tracking");
 
         if (old.exists()) {
-            long id = buscar(old);
-            implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
+            long id = find(old);
+            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
 
             old = new File(file.getAbsolutePath() + File.separator + "vt");
             if (old.renameTo(neu)) {
-                actualizarNew((int) id, "Visual Tracking");
+                updateNew((int) id, "Visual Tracking");
             }
         } else {
             DocumentDto documentDto1 = new DocumentDto();
@@ -595,14 +597,14 @@ public class MigrateSystem {
             documentDto1.setName("My Factory");
             documentDto1.setTypeDoc("FOLDER");
 
-            documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
+            implNew.createDocument(documentDto1, "Emisuite");
         }
 
         DocumentDto documentDto1 = new DocumentDto();
         documentDto1.setName("Visual SGA");
         documentDto1.setTypeDoc("FOLDER");
 
-        documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
+        implNew.createDocument(documentDto1, "Emisuite");
 
     }
 
