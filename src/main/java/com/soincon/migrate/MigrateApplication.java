@@ -205,7 +205,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                         case ("y"):
                         case ("Y"):
                             WarningUtil.showWarning("INFORMACION", "Borrando todo ");
-                            migrateSystem.borrar(pathroot);
+                            migrateSystem.delete(pathroot);
                             break;
                         default:
                             break;

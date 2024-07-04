@@ -40,7 +40,7 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo que implica toda la logica para la migracion de ficheros y carpetas
+     * method that involves all the logic for the migration of files and folders
      *
      * @param path    path of the old root
      * @param parent  dto with the information from the parent of the current file
@@ -112,17 +112,17 @@ public class MigrateSystem {
                     String extension = FilenameUtils.getExtension(directory.getAbsolutePath());
 
                     if (extension.isEmpty()) {
-                        File file3 = asignarExtension(directory);
+                        File file3 = giveExtension(directory);
                         if (directory.renameTo(file3)) {
                             directory = file3;
                         }
                         extension = FilenameUtils.getExtension(directory.getAbsolutePath());
 
                     } else {
-                        extension = FilenameUtils.getExtension(asignarExtension(directory).getAbsolutePath());
+                        extension = FilenameUtils.getExtension(giveExtension(directory).getAbsolutePath());
                     }
 
-                    String name = quitarExtension(directory);
+                    String name = removeExtension(directory);
                     do {
                         String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
                         File file2 = new File(directory.getParentFile().getPath() + File.separator + fullName);
@@ -259,7 +259,7 @@ public class MigrateSystem {
         documentVersionDto.setIdVersion(i);
         documentVersionDto.setIdDocument(documentDto.getIdDocument());
         documentVersionDto.setExternalCode(fullName);
-        documentVersionDto.setIdUser(obtenerToken());
+        documentVersionDto.setIdUser(obtainToken());
         documentVersionDto.setReason("migrate");
         documentVersionDto.setVersionStatus("VALID");
         documentVersionDto.setUploadDate(ZonedDateTime.now().toString());
@@ -272,11 +272,11 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo que obtiene el id de usuario con el tokem
+     * method that obtains the user id with the token
      *
      * @return the id of the user
      */
-    private Integer obtenerToken() {
+    private Integer obtainToken() {
         int idUser = 1;
 
         String[] chunks = Jwtoken.getToken().split("\\.");
@@ -298,13 +298,13 @@ public class MigrateSystem {
     }
 
     /**
-     * Metodo que le pone una extension a un fichero si este no tiene una
+     * Method that gives an extension to a file if it does not have one
      *
      * @param file the file without extension
      * @return file with extension
      * @throws IOException Returns an error if there is any issue with the file.
      */
-    private File asignarExtension(File file) throws IOException {
+    private File giveExtension(File file) throws IOException {
         FilterDirectory filterDirectory = new FilterDirectory();
         Content content = new Content();
         content.setExactName(file.getName());
@@ -327,12 +327,12 @@ public class MigrateSystem {
     }
 
     /**
-     * Metodo que sirve para obtener el nombre de un fichero sin su extension
+     * Method used to obtain the name of a file without its extension
      *
      * @param file file with extension
      * @return name of the file without extension
      */
-    private String quitarExtension(File file) {
+    private String removeExtension(File file) {
         String fileName = "";
         int lastIndex = file.getName().lastIndexOf('.');
         if (lastIndex != -1) {
@@ -346,10 +346,10 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo que revisa la carpeta root y si esta contiene ficheros los mueve a una nueva ubicacion
+     *Method that checks the root folder and if it contains files, moves them to a new location
      *
-     * @param pathroot Ubicacion root antigua
-     * @param newRoot  Nueva ubicacion de root
+     * @param pathroot Old root location
+     * @param newRoot  New root location
      * @throws IOException Returns an error if there is any issue with the file.
      */
     public void cleanRoot(String pathroot, String newRoot) throws Exception {
@@ -382,14 +382,14 @@ public class MigrateSystem {
                                 String extension = FilenameUtils.getExtension(file.getAbsolutePath());
 
                                 if (extension.isEmpty()) {
-                                    File file3 = asignarExtension(directory);
+                                    File file3 = giveExtension(directory);
                                     if (file.renameTo(file3)) {
                                         file = file3;
                                     }
                                     extension = FilenameUtils.getExtension(file.getAbsolutePath());
 
                                 }
-                                String name = quitarExtension(directory);
+                                String name = removeExtension(directory);
                                 do {
                                     String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
                                     file2 = new File(file2 + File.separator + fullName);
@@ -410,7 +410,7 @@ public class MigrateSystem {
                             String extension = FilenameUtils.getExtension(file.getAbsolutePath());
 
                             if (extension.isEmpty()) {
-                                File file3 = asignarExtension(directory);
+                                File file3 = giveExtension(directory);
                                 if (file.renameTo(file3)) {
                                     file = file3;
                                 }
@@ -418,7 +418,7 @@ public class MigrateSystem {
 
                             }
 
-                            String name = quitarExtension(directory);
+                            String name = removeExtension(directory);
                             do {
                                 String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
                                 file2 = new File(file2 + File.separator + fullName);
@@ -466,11 +466,11 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo que crea un documento nuevo en la nueva base de datos
+     * method that creates a new document in the new database
      *
-     * @param file carpeta que se quiere crear en la base de datos
-     * @return el nuevo documento creado
-     * @throws IOException si ocurre algo con loos ficheros
+     * @param file folder you want to create in the database
+     * @return the new document created
+     * @throws IOException if something happens with the files
      */
     private DocumentDto createNew(File file) throws Exception {
         DocumentDto documentDto = new DocumentDto();
@@ -480,15 +480,15 @@ public class MigrateSystem {
     }
 
     /**
-     * metodo que borra el arbol de directorios antiguo
+     * method that deletes the old directory tree
      *
-     * @param path ubicacion que se va a borrar
+     * @param path location to be deleted
      */
-    public void borrar(String path) {
+    public void delete(String path) {
         File file = new File(path);
         if (file.listFiles() != null) {
             for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                borrar(subFile.getPath());
+                delete(subFile.getPath());
             }
         }
         file.delete();
@@ -562,11 +562,11 @@ public class MigrateSystem {
         neu = new File(file.getAbsolutePath() + File.separator+"Easy GMAO");
 
         if (old.exists()) {
-            long id = buscar(old);
-            implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
+            long id = find(old);
+            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator +"easy-gmao");
             if (old.renameTo(neu)) {
-                actualizarNew((int) id, "Easy GMAO");
+                updateNew((int) id, "Easy GMAO");
             }
         } else {
             DocumentDto documentDto1 = new DocumentDto();
@@ -584,11 +584,11 @@ public class MigrateSystem {
         neu = new File(file.getAbsolutePath() + File.separator+"My Factory");
 
         if (old.exists()) {
-            long id = buscar(old);
-            implNew.moveDocuments(Math.toIntExact(id), null/*Math.toIntExact(documentDto.getIdDocument())*/, "Emisuite");
+            long id = find(old);
+            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator+"my-factory");
             if (old.renameTo(neu)) {
-                actualizarNew((int) id, "My Factory");
+                updateNew((int) id, "My Factory");
             }
         } else {
             DocumentDto documentDto1 = new DocumentDto();
@@ -613,7 +613,7 @@ public class MigrateSystem {
      * @return TE ID OF THE SPECIFIED FILE
      * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
      */
-    private long buscar(File old) throws IOException {
+    private long find(File old) throws IOException {
         return implNew.searchByPathName(old).get(0).getIdDocument();
     }
 
@@ -624,7 +624,7 @@ public class MigrateSystem {
      * @param name NEW NAME OF THE FOLDER
      * @throws IOException IF ANY ERROR OCCUR WITH RETROFIT
      */
-    private void actualizarNew(int id, String name) throws IOException {
+    private void updateNew(int id, String name) throws IOException {
         DocumentDto documentsDto = implNew.getDocument(id);
 
         documentsDto.setName(name);
