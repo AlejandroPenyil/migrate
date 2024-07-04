@@ -33,7 +33,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             +File.separator+"Cross-Solutions"
             +File.separator+"Documents"
             +File.separator+"RepoTest");
-    private File odl = new File(File.listRoots()[0].getPath()
+    private final File odl = new File(File.listRoots()[0].getPath()
             +File.separator+"opt"
             +File.separator+"tools"
             +File.separator+"tomcat"
@@ -104,7 +104,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
         Scanner src = new Scanner(System.in);
 
-//        log.info("Enter the root location to clean (leave empty to use the default path):\n{}", odl);
         String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
                 "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl + "\n");
         if (pathroot.isEmpty()) {
