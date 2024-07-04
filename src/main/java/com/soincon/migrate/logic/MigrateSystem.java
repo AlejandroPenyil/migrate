@@ -354,13 +354,13 @@ public class MigrateSystem {
     /**
      *Method that checks the root folder and if it contains files, moves them to a new location
      *
-     * @param pathroot Old root location
+     * @param pathRoot Old root location
      * @param newRoot  New root location
      * @throws IOException Returns an error if there is any issue with the file.
      */
-    public void cleanRoot(String pathroot, String newRoot) throws Exception {
+    public void cleanRoot(String pathRoot, String newRoot) throws Exception {
 
-        Path path = Paths.get(pathroot);
+        Path path = Paths.get(pathRoot);
         File directory = path.toFile();
 
         File newDirectory = new File(newRoot);
