@@ -20,7 +20,7 @@ public class ImplOld {
     FileTypeService fileTypeService;
     DirectoryService directoryService;
 
-    public ImplOld(){
+    public ImplOld() {
         fileService = RetroFitClientOld.getInstanceRetrofit().create(FileService.class);
         fileTypeService = RetroFitClientOld.getInstanceRetrofit().create(FileTypeService.class);
         directoryService = RetroFitClientOld.getInstanceRetrofit().create(DirectoryService.class);

@@ -11,7 +11,7 @@ public class RetroFitNew {
     private static Retrofit retrofit;
     private static String baseUrl;
 
-    public static Retrofit getInstanceRetrofit(String token){
+    public static Retrofit getInstanceRetrofit(String token) {
         baseUrl = System.getProperty("api2.base.url");
         if (retrofit == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder()

@@ -9,9 +9,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -28,18 +29,18 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     public static int totalFilesAndDirectories;
 
     public static File f = new File(File.listRoots()[0].getPath()
-            +File.separator+"Soincon"
-            +File.separator+"EMI"
-            +File.separator+"Cross-Solutions"
-            +File.separator+"Documents"
-            +File.separator+"RepoTest");
+            + File.separator + "Soincon"
+            + File.separator + "EMI"
+            + File.separator + "Cross-Solutions"
+            + File.separator + "Documents"
+            + File.separator + "RepoTest");
     private final File odl = new File(File.listRoots()[0].getPath()
-            +File.separator+"opt"
-            +File.separator+"tools"
-            +File.separator+"tomcat"
-            +File.separator+"latest"
-            +File.separator+"files"
-            +File.separator+"clients");
+            + File.separator + "opt"
+            + File.separator + "tools"
+            + File.separator + "tomcat"
+            + File.separator + "latest"
+            + File.separator + "files"
+            + File.separator + "clients");
 
     @CommandLine.Option(names = {"-a1", "--api1"}, description = "URL base para la API de la que se va a migrar", required = true)
     private String api1Url;
@@ -133,7 +134,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
 
 
         f = new File(newRoot);
-        if(f.mkdirs()){
+        if (f.mkdirs()) {
             log.info("created: {}", f.getAbsolutePath());
         }
 
@@ -143,8 +144,8 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
-        WarningUtil.showWarning("","\rModificando todo de: " + pathroot);
-        WarningUtil.showWarning("","\rEsto llevara un rato...");
+        WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
+        WarningUtil.showWarning("", "\rEsto llevara un rato...");
 
         File file = new File(pathroot);
         totalFilesAndDirectories = countFilesAndDirectories(file);
@@ -163,7 +164,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
         System.out.println();
-        WarningUtil.showWarning("","\rMigracion completada.");
+        WarningUtil.showWarning("", "\rMigracion completada.");
 
         WarningUtil.showAlert("ALERTA", "¿Quieres borrar todos los archivos del root antiguo? si lo borras " +
                 "no lo podras recuperar mas tarde. Y/N");
@@ -190,16 +191,16 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     break;
                 case ("n"):
                 case ("N"):
-                    WarningUtil.showWarning("","\rTerminando el programa");
+                    WarningUtil.showWarning("", "\rTerminando el programa");
                     t = false;
                     break;
                 default:
-                    WarningUtil.showAlert("","\rElige una opcion Y/N");
+                    WarningUtil.showAlert("", "\rElige una opcion Y/N");
                     t = true;
                     break;
             }
         } while (t);
-        WarningUtil.showWarning("","\rPrograma terminado");
+        WarningUtil.showWarning("", "\rPrograma terminado");
         AnsiConsole.systemUninstall();
 
     }

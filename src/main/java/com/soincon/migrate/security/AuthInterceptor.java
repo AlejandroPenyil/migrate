@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 public class AuthInterceptor implements Interceptor {
-    private String authToken;
+    private final String authToken;
 
     public AuthInterceptor(String token) {
         this.authToken = token;

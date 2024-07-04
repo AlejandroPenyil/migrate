@@ -2,7 +2,7 @@
 
 <configuration>
 
-    <property name="FilePath" value="logs" />
+    <property name="FilePath" value="logs"/>
 
     <!-- File logging configuration -->
     <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -26,12 +26,12 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="WARN" />
-    <logger name="org.hibernate.SQL" level="WARN" />
-    <logger name="com.soincon" level="INFO" />
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="com.soincon" level="INFO"/>
 
     <root level="WARN">
-        <appender-ref ref="File" />
+        <appender-ref ref="File"/>
         <!-- <appender-ref ref="Console" /> -->
     </root>
 </configuration>

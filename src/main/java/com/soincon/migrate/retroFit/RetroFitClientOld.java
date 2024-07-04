@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class RetroFitClientOld {
     private static Retrofit retrofit;
 
-    public static Retrofit getInstanceRetrofit(){
+    public static Retrofit getInstanceRetrofit() {
         String baseUrl = System.getProperty("api.base.url");
 
         if (retrofit == null) {

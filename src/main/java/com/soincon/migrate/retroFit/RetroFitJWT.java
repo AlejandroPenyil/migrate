@@ -10,7 +10,7 @@ public class RetroFitJWT {
     private static Retrofit retrofit;
     private static final String baseUrl = System.getProperty("api.security.base.url");
 
-    public static Retrofit getInstanceRetrofit(){
+    public static Retrofit getInstanceRetrofit() {
 
         if (retrofit == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS);

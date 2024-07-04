@@ -83,7 +83,7 @@ public class MigrateSystem {
             } else {
                 DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
-                if(file2.mkdir()){
+                if (file2.mkdir()) {
                     log.info("crated {}", file2.getAbsolutePath());
                 }
 
@@ -155,7 +155,7 @@ public class MigrateSystem {
                 }
             } else {
                 File directory = Paths.get(String.valueOf(f), "notfound").toFile();
-                if(directory.mkdir()){
+                if (directory.mkdir()) {
                     log.info("created {}", directory.getAbsolutePath());
                 }
                 boolean t = true;
@@ -169,7 +169,7 @@ public class MigrateSystem {
                             log.error("Cannot create {}", file2);
                         }
                         if (file2.exists()) {
-                            log.info("copy file: {}",file2.getAbsolutePath());
+                            log.info("copy file: {}", file2.getAbsolutePath());
                             t = false;
                         }
                     }
@@ -353,7 +353,7 @@ public class MigrateSystem {
     }
 
     /**
-     *Method that checks the root folder and if it contains files, moves them to a new location
+     * Method that checks the root folder and if it contains files, moves them to a new location
      *
      * @param pathRoot Old root location
      * @param newRoot  New root location
@@ -378,7 +378,7 @@ public class MigrateSystem {
                         if (!exists(file)) {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
-                            if(file2.mkdirs()){
+                            if (file2.mkdirs()) {
                                 log.info("created: {}", file2.getAbsolutePath());
                             }
                             file2 = new File(file2 + File.separator + file.getName());
@@ -412,7 +412,7 @@ public class MigrateSystem {
                                 } while (!tr);
                             }
                         } else {
-                            if(file2.mkdir()){
+                            if (file2.mkdir()) {
                                 log.info("created: {}", file2.getPath());
                             }
                             int i = 1;
@@ -454,15 +454,15 @@ public class MigrateSystem {
                         if (!exists(file)) {
                             path = Paths.get(String.valueOf(f), "notFound");
                             file2 = path.toFile();
-                            if(file2.mkdirs()){
+                            if (file2.mkdirs()) {
                                 log.info("created: {}", file2.getPath());
                             }
                             file = new File(file2 + File.separator + file.getName());
-                            if(file.mkdir()){
+                            if (file.mkdir()) {
                                 log.info("created: {}", file.getPath());
                             }
                         } else {
-                            if(file2.mkdir()){
+                            if (file2.mkdir()) {
                                 log.info("created: {}", file2.getPath());
                             }
 
@@ -508,18 +508,18 @@ public class MigrateSystem {
                 delete(subFile.getPath());
             }
         }
-        if(file.delete()){
+        if (file.delete()) {
             log.info("delete has been completed successfully");
-        }else{
+        } else {
             log.error("An error has occurred and the deletion of {} could not be completed", file.getAbsolutePath());
         }
     }
 
     public void newMigration(File f) throws Exception {
-        File file = new File(f.getAbsolutePath() + File.separator +"Emisuite");
+        File file = new File(f.getAbsolutePath() + File.separator + "Emisuite");
         if (file.exists()) {
 //            DocumentDto documentDto = findDocument(file);
-            moveToEmisuite(f.getAbsolutePath() + File.separator +"clients", file);
+            moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
         } else {
             DocumentDto documentDto = new DocumentDto();
             documentDto.setTypeDoc("FOLDER");
@@ -538,12 +538,12 @@ public class MigrateSystem {
      * @throws Exception IF ANY ERROR OCCUR WITH RETROFIT
      */
     private void moveToEmisuite(String s, File file) throws Exception {
-        File old = new File(s + File.separator+ "1" + File.separator +"vt");
-        File neu = new File(file.getAbsolutePath() + File.separator +"Visual Tracking");
+        File old = new File(s + File.separator + "1" + File.separator + "vt");
+        File neu = new File(file.getAbsolutePath() + File.separator + "Visual Tracking");
 
         if (old.exists()) {
             long id = find(old);
-            log.info("{} find, now moving to {}",old, neu);
+            log.info("{} find, now moving to {}", old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
 
             old = new File(file.getAbsolutePath() + File.separator + "vt");
@@ -551,7 +551,7 @@ public class MigrateSystem {
                 updateNew((int) id, "Visual Tracking");
             }
         } else {
-            log.info("{} not find, now creating to {}",old, neu);
+            log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Visual Tracking");
             documentDto1.setTypeDoc("FOLDER");
@@ -559,19 +559,19 @@ public class MigrateSystem {
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(s + File.separator+"1"+File.separator+"easy-gmao");
-        neu = new File(file.getAbsolutePath() + File.separator+"Easy GMAO");
+        old = new File(s + File.separator + "1" + File.separator + "easy-gmao");
+        neu = new File(file.getAbsolutePath() + File.separator + "Easy GMAO");
 
         if (old.exists()) {
             long id = find(old);
-            log.info("{} find, now moving to {}",old, neu);
+            log.info("{} find, now moving to {}", old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
-            old = new File(file.getAbsolutePath() + File.separator +"easy-gmao");
+            old = new File(file.getAbsolutePath() + File.separator + "easy-gmao");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "Easy GMAO");
             }
         } else {
-            log.info("{} not find, now creating to {}",old, neu);
+            log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Easy GMAO");
             documentDto1.setTypeDoc("FOLDER");
@@ -583,19 +583,19 @@ public class MigrateSystem {
             DocumentService.updateDocument(documentDto1);
         }
 
-        old = new File(s + File.separator+"clientid-1"+File.separator+"my-factory");
-        neu = new File(file.getAbsolutePath() + File.separator+"My Factory");
+        old = new File(s + File.separator + "clientid-1" + File.separator + "my-factory");
+        neu = new File(file.getAbsolutePath() + File.separator + "My Factory");
 
         if (old.exists()) {
             long id = find(old);
-            log.info("{} find, now moving to {}",old, neu);
+            log.info("{} find, now moving to {}", old, neu);
             implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
-            old = new File(file.getAbsolutePath() + File.separator+"my-factory");
+            old = new File(file.getAbsolutePath() + File.separator + "my-factory");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "My Factory");
             }
         } else {
-            log.info("{} not find, now creating to {}",old, neu);
+            log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("My Factory");
             documentDto1.setTypeDoc("FOLDER");
