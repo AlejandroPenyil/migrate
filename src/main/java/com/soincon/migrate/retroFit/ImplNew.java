@@ -34,13 +34,6 @@ public class ImplNew {
         iDocumentVersionService = RetroFitNew.getInstanceRetrofit(token.getToken()).create(IDocumentVersionService.class);
     }
 
-
-    public List<DocumentDto> findDocuments() throws IOException {
-        Call<List<DocumentDto>> call = iDocumentService.findRootDocuments();
-        Response<List<DocumentDto>> response = call.execute();
-        return response.body();
-    }
-
     public DocumentDto createDocument(DocumentDto document, String path) throws Exception {
         Call<DocumentDto> call = iDocumentService.createDocument(path, document);
         Response<DocumentDto> response = call.execute();
@@ -95,12 +88,6 @@ public class ImplNew {
     public DocumentDto findByUUID(String UUID) throws IOException {
         Call<DocumentDto> call = iDocumentService.findDocumentByUUID(UUID);
         Response<DocumentDto> response = call.execute();
-        return response.body();
-    }
-
-    public List<DocumentDto> copyDocuments(int id, Integer idTarget, String pathBase) throws IOException {
-        Call<List<DocumentDto>> call = iDocumentService.copyDocument(idTarget, pathBase, true, Collections.singletonList(id));
-        Response<List<DocumentDto>> response = call.execute();
         return response.body();
     }
 }
