@@ -1,7 +1,8 @@
 package com.soincon.migrate.retroFit;
 
-import com.soincon.migrate.dto.newDtos.DocumentDto;
-import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
+import emisuite.documentmanager.enums.TypeDoc;
+import emisuite.documentmanager.dto.DocumentDto;
+import emisuite.documentmanager.dto.DocumentVersionDto;
 import com.soincon.migrate.iservice.Autorithation;
 import com.soincon.migrate.iservice.IDocumentService;
 import com.soincon.migrate.iservice.IDocumentVersionService;
@@ -79,7 +80,7 @@ public class ImplNew {
         return response.body();
     }
 
-    public List<DocumentDto> moveDocuments(int id, Integer idTarget, String pathBase) throws IOException {
+    public List<DocumentDto> moveDocuments(Long id, Integer idTarget, String pathBase) throws IOException {
         Call<List<DocumentDto>> call = iDocumentService.moveDocument(idTarget, pathBase, Collections.singletonList(id));
         Response<List<DocumentDto>> response = call.execute();
         return response.body();

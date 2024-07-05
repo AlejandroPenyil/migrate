@@ -1,14 +1,18 @@
 package com.soincon.migrate.retroFit;
 
-import com.soincon.migrate.dto.oldDtos.DirectoryDto;
-import com.soincon.migrate.dto.oldDtos.FileDto;
-import com.soincon.migrate.dto.oldDtos.FileTypeDto;
-import com.soincon.migrate.dto.oldDtos.PathDto;
-import com.soincon.migrate.filter.FilterDirectory;
-import com.soincon.migrate.filter.PaginatedList;
 import com.soincon.migrate.iservice.DirectoryService;
 import com.soincon.migrate.iservice.FileService;
 import com.soincon.migrate.iservice.FileTypeService;
+
+import es.snc.common.persistence.PaginatedList;
+import es.snc.common.persistence.filter.Filter;
+import es.snc.document.manager.dto.DirectoryDto;
+import es.snc.document.manager.dto.FileDto;
+import es.snc.document.manager.dto.FileTypeDto;
+import es.snc.document.manager.dto.PathDto;
+import es.snc.document.manager.persistence.filter.DirectoryFilter;
+import es.snc.document.manager.persistence.filter.FileFilter;
+
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -39,14 +43,14 @@ public class ImplOld {
         return response.body();
     }
 
-    public List<FileDto> searchFileByFilterAll(FilterDirectory filterDirectory) throws IOException {
+    public List<FileDto> searchFileByFilterAll(Filter<FileFilter> filterDirectory) throws IOException {
         Call<PaginatedList<FileDto>> call = fileService.searchFilesByFilter(filterDirectory);
         Response<PaginatedList<FileDto>> response = call.execute();
         assert response.body() != null;
         return response.body().getResults();
     }
 
-    public List<DirectoryDto> searchDirectoryByFilterAll(FilterDirectory filterDirectory) throws IOException {
+    public List<DirectoryDto> searchDirectoryByFilterAll(Filter<DirectoryFilter> filterDirectory) throws IOException {
         Call<PaginatedList<DirectoryDto>> call = directoryService.searchDirectoryByFilterAll(filterDirectory);
         Response<PaginatedList<DirectoryDto>> response = call.execute();
         assert response.body() != null;

@@ -1,6 +1,6 @@
 package com.soincon.migrate.logic;
 
-import com.soincon.migrate.dto.newDtos.DocumentDto;
+import emisuite.documentmanager.dto.DocumentDto;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,7 +19,7 @@ public class DocumentService {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, documentDto.getUuid());
+            pstmt.setString(1, String.valueOf(documentDto.getUuid()));
             pstmt.setLong(2, documentDto.getIdDocument());
 
             int rowsAffected = pstmt.executeUpdate();

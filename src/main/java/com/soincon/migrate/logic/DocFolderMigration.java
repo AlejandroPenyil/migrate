@@ -1,7 +1,8 @@
 package com.soincon.migrate.logic;
 
-import com.soincon.migrate.dto.newDtos.DocumentDto;
+import emisuite.documentmanager.dto.DocumentDto;
 import com.soincon.migrate.retroFit.ImplNew;
+import emisuite.documentmanager.enums.TypeDoc;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,7 +32,7 @@ public class DocFolderMigration {
 
     private long parentId(File file) throws IOException {
         DocumentDto documentDto = new DocumentDto();
-        documentDto.setTypeDoc("FOLDER");
+        documentDto.setTypeDoc(TypeDoc.FOLDER);
         documentDto.setName(file.getParentFile().getName());
 
         if (this.documentDto != null) {
