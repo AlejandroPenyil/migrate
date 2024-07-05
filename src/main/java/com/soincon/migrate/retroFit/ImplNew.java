@@ -3,7 +3,7 @@ package com.soincon.migrate.retroFit;
 import emisuite.documentmanager.enums.TypeDoc;
 import emisuite.documentmanager.dto.DocumentDto;
 import emisuite.documentmanager.dto.DocumentVersionDto;
-import com.soincon.migrate.iservice.Autorithation;
+import com.soincon.migrate.iservice.Authorization;
 import com.soincon.migrate.iservice.IDocumentService;
 import com.soincon.migrate.iservice.IDocumentVersionService;
 import com.soincon.migrate.security.AuthenticationUser;
@@ -21,13 +21,13 @@ import java.util.List;
 public class ImplNew {
     IDocumentService iDocumentService;
     IDocumentVersionService iDocumentVersionService;
-    Autorithation autorithation;
+    Authorization authorization;
     public static Token Jwtoken;
 
     public ImplNew() throws IOException {
-        autorithation = RetroFitJWT.getInstanceRetrofit().create(Autorithation.class);
+        authorization = RetroFitJWT.getInstanceRetrofit().create(Authorization.class);
         AuthenticationUser authenticationUser = new AuthenticationUser();
-        Call<Token> call = autorithation.findFiles(authenticationUser);
+        Call<Token> call = authorization.findFiles(authenticationUser);
         Response<Token> response = call.execute();
         Token token = response.body();
         Jwtoken = token;
