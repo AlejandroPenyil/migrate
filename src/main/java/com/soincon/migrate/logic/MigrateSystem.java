@@ -564,7 +564,7 @@ public class MigrateSystem {
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(s + File.separator + "1" + File.separator + "easy-gmao");
+        old = new File(s + File.separator + "1" + File.separator + "easy_gmao");
         neu = new File(file.getAbsolutePath() + File.separator + "Easy GMAO");
 
         if (old.exists()) {
