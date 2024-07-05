@@ -1,6 +1,7 @@
 package com.soincon.migrate.iservice;
 
-import com.soincon.migrate.dto.newDtos.DocumentDto;
+import emisuite.documentmanager.dto.DocumentDto;
+import emisuite.documentmanager.enums.TypeDoc;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -15,7 +16,7 @@ public interface IDocumentService {
 
     @GET("document/search")
     Call<List<DocumentDto>> searchDocument(@Query("name") String name,
-                                           @Query("typeDoc") String typeDoc,
+                                           @Query("typeDoc") TypeDoc typeDoc,
                                            @Query("idParent") Long id,
                                            @Query("idDocument") Long idDocument);
 
@@ -33,7 +34,7 @@ public interface IDocumentService {
     @POST("document/moveDocument")
     Call<List<DocumentDto>> moveDocument(@Query("idTarget") Integer idTarget,
                                          @Query("pathBase") String pathBase,
-                                         @Body List<Integer> ids);
+                                         @Body List<Long> ids);
 
     @POST("document/copyDocument")
     Call<List<DocumentDto>> copyDocument(@Query("idTarget") Integer idTarget,

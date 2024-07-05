@@ -1,14 +1,18 @@
 package com.soincon.migrate.logic;
 
+import emisuite.documentmanager.enums.TypeDoc;
+import emisuite.documentmanager.dto.DocumentDto;
+import emisuite.documentmanager.dto.DocumentVersionDto;
+import emisuite.documentmanager.enums.VersionStatus;
+import es.snc.common.persistence.filter.Filter;
+import es.snc.document.manager.dto.DirectoryDto;
+import es.snc.document.manager.dto.PathDto;
+import es.snc.document.manager.dto.FileDto;
+import es.snc.document.manager.dto.FileTypeDto;
+import es.snc.document.manager.persistence.filter.DirectoryFilter;
+import es.snc.document.manager.persistence.filter.FileFilter;
+
 import com.soincon.migrate.command.WarningUtil;
-import com.soincon.migrate.dto.newDtos.DocumentDto;
-import com.soincon.migrate.dto.newDtos.DocumentVersionDto;
-import com.soincon.migrate.dto.oldDtos.DirectoryDto;
-import com.soincon.migrate.dto.oldDtos.FileDto;
-import com.soincon.migrate.dto.oldDtos.FileTypeDto;
-import com.soincon.migrate.dto.oldDtos.PathDto;
-import com.soincon.migrate.filter.Content;
-import com.soincon.migrate.filter.FilterDirectory;
 import com.soincon.migrate.retroFit.ImplNew;
 import com.soincon.migrate.retroFit.ImplOld;
 import lombok.extern.log4j.Log4j2;
@@ -57,7 +61,7 @@ public class MigrateSystem {
 
                 DocumentDto documentDto = new DocumentDto();
                 documentDto.setName(name);
-                documentDto.setTypeDoc("FOLDER");
+                documentDto.setTypeDoc(TypeDoc.FOLDER);
 
                 String pathToErase;
                 if (directory.getParentFile().getAbsolutePath().equals(f.getAbsolutePath())) {
@@ -72,7 +76,7 @@ public class MigrateSystem {
                 documentDto = implNew.createDocument(documentDto, mkdPath);
 
                 if (uuid != null) {
-                    documentDto.setUuid(uuid);
+                    documentDto.setUuid(UUID.fromString(uuid));
                     DocumentService.updateDocument(documentDto);
                 }
                 for (File subFile : Objects.requireNonNull(file.listFiles())) {
@@ -134,17 +138,17 @@ public class MigrateSystem {
                             tr = true;
                             DocumentDto documentDto = new DocumentDto();
                             documentDto.setName(name.toLowerCase());
-                            documentDto.setTypeDoc("DOC");
+                            documentDto.setTypeDoc(TypeDoc.DOC);
                             documentDto.setIdParent(docFolderMigration.getDocumentDto().getIdDocument());
 
                             documentDto = implNew.createDocument(documentDto, file2.getParentFile().getPath().toLowerCase());
                             if (uuid != null) {
-                                documentDto.setUuid(uuid);
+                                documentDto.setUuid(UUID.fromString(uuid));
                                 DocumentService.updateDocument(documentDto);
                             }
                             fi++;
                             if (documentDto != null) {
-                                createVersion(documentDto, i, fullName, file2);
+                                createVersion(documentDto, (long) i, fullName, file2);
                                 fi--;
                             } else {
                                 log.info("You need to check this: {}", file);
@@ -189,23 +193,24 @@ public class MigrateSystem {
         if (directoryDtoList != null) {
             if (!directoryDtoList.isEmpty()) {
                 for (DirectoryDto directoryDto : directoryDtoList) {
-                    uuid = directoryDto.getId();
+                    uuid = String.valueOf(directoryDto.getId());
                     return true;
                 }
             }
         }
 
-        FilterDirectory filterDirectory = new FilterDirectory();
-        Content content = new Content();
-        content.setExactName(file.getName());
+        Filter<DirectoryFilter> filter = new Filter<>();
+        DirectoryFilter directoryFilter = new DirectoryFilter();
+        directoryFilter.setExactName(file.getName());
 
-        filterDirectory.setContent(content);
-        List<DirectoryDto> fileDtoList = implOld.searchDirectoryByFilterAll(filterDirectory);
+        filter.setContent(directoryFilter);
+
+        List<DirectoryDto> fileDtoList = implOld.searchDirectoryByFilterAll(filter);
 
         if (!fileDtoList.isEmpty()) {
             for (DirectoryDto fileDto : fileDtoList) {
                 if (file.getParentFile().getAbsolutePath().equalsIgnoreCase(fileDto.getPathBase())) {
-                    uuid = fileDto.getId();
+                    uuid = String.valueOf(fileDto.getId());
                     return true;
                 }
             }
@@ -230,18 +235,18 @@ public class MigrateSystem {
         if (directoryDtoList != null) {
             if (!directoryDtoList.isEmpty()) {
                 for (FileDto directoryDto : directoryDtoList) {
-                    uuid = directoryDto.getId();
+                    uuid = String.valueOf(directoryDto.getId());
                     return true;
                 }
             }
         }
 
-        FilterDirectory filterDirectory = new FilterDirectory();
-        Content content = new Content();
-        content.setExactName(file.getName());
-        filterDirectory.setContent(content);
+        Filter<FileFilter> filter = new Filter<>();
+        FileFilter filterFile = new FileFilter();
+        filterFile.setExactName(file.getName());
+        filter.setContent(filterFile);
 
-        List<FileDto> fileDtoList = implOld.searchFileByFilterAll(filterDirectory);
+        List<FileDto> fileDtoList = implOld.searchFileByFilterAll(filter);
 
         if (!fileDtoList.isEmpty()) {
             for (FileDto fileDto : fileDtoList) {
@@ -261,14 +266,14 @@ public class MigrateSystem {
      * @param fullName    The full name.
      * @throws IOException Returns an error if there is any issue with the file.
      */
-    private void createVersion(DocumentDto documentDto, int i, String fullName, File file) throws IOException {
+    private void createVersion(DocumentDto documentDto, Long i, String fullName, File file) throws IOException {
         DocumentVersionDto documentVersionDto = new DocumentVersionDto();
         documentVersionDto.setIdVersion(i);
         documentVersionDto.setIdDocument(documentDto.getIdDocument());
         documentVersionDto.setExternalCode(fullName);
         documentVersionDto.setIdUser(obtainToken());
         documentVersionDto.setReason("migrate");
-        documentVersionDto.setVersionStatus("VALID");
+        documentVersionDto.setVersionStatus(VersionStatus.VALID);
         documentVersionDto.setUploadDate(ZonedDateTime.now().toString());
         Path path = file.toPath();
 
@@ -283,8 +288,8 @@ public class MigrateSystem {
      *
      * @return the id of the user
      */
-    private Integer obtainToken() {
-        int idUser = 1;
+    private Long obtainToken() {
+        long idUser = 1L;
 
         String[] chunks = Jwtoken.getToken().split("\\.");
 
@@ -297,7 +302,7 @@ public class MigrateSystem {
         for (String s : code) {
             if (s.contains("userId")) {
                 String[] id = s.split(":");
-                idUser = Integer.parseInt(id[1]);
+                idUser = Long.parseLong(id[1]);
             }
         }
 
@@ -312,13 +317,13 @@ public class MigrateSystem {
      * @throws IOException Returns an error if there is any issue with the file.
      */
     private File giveExtension(File file) throws IOException {
-        FilterDirectory filterDirectory = new FilterDirectory();
-        Content content = new Content();
-        content.setExactName(file.getName());
+        Filter<FileFilter> filter = new Filter<>();
+        FileFilter filterFile = new FileFilter();
+        filterFile.setExactName(file.getName());
 
-        filterDirectory.setContent(content);
+        filter.setContent(filterFile);
 
-        List<FileDto> fileDtoList = implOld.searchFileByFilterAll(filterDirectory);
+        List<FileDto> fileDtoList = implOld.searchFileByFilterAll(filter);
         if (!fileDtoList.isEmpty()) {
             for (FileDto fileDto : fileDtoList) {
                 List<FileTypeDto> fileTypeDtos = implOld.getFileTypes();
@@ -438,12 +443,12 @@ public class MigrateSystem {
                                     if (file2.exists()) {
                                         tr = true;
                                         DocumentDto documentDto1 = new DocumentDto();
-                                        documentDto1.setTypeDoc("DOC");
+                                        documentDto1.setTypeDoc(TypeDoc.DOC);
                                         documentDto1.setName(file.getName());
                                         documentDto1.setIdParent(documentDto.getIdDocument());
                                         documentDto1 = implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
                                         if (documentDto1 != null) {
-                                            createVersion(documentDto, i, fullName, file2);
+                                            createVersion(documentDto, (long) i, fullName, file2);
                                         }
                                     }
                                 }
@@ -470,7 +475,7 @@ public class MigrateSystem {
                             if (file2.mkdir()) {
 
                                 DocumentDto documentDto1 = new DocumentDto();
-                                documentDto1.setTypeDoc("FOLDER");
+                                documentDto1.setTypeDoc(TypeDoc.FOLDER);
                                 documentDto1.setName(file.getName());
                                 documentDto1.setIdParent(documentDto.getIdParent());
                                 implNew.createDocument(documentDto1, file.getParentFile().getAbsolutePath());
@@ -492,7 +497,7 @@ public class MigrateSystem {
     private DocumentDto createNew(File file) throws Exception {
         DocumentDto documentDto = new DocumentDto();
         documentDto.setName(file.getName());
-        documentDto.setTypeDoc("FOLDER");
+        documentDto.setTypeDoc(TypeDoc.FOLDER);
         return implNew.createDocument(documentDto, file.getParentFile().getAbsolutePath());
     }
 
@@ -522,7 +527,7 @@ public class MigrateSystem {
             moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
         } else {
             DocumentDto documentDto = new DocumentDto();
-            documentDto.setTypeDoc("FOLDER");
+            documentDto.setTypeDoc(TypeDoc.FOLDER);
             documentDto.setName(file.getName());
             implNew.createDocument(documentDto, "");
 
@@ -544,7 +549,7 @@ public class MigrateSystem {
         if (old.exists()) {
             long id = find(old);
             log.info("{} find, now moving to {}", old, neu);
-            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
+            implNew.moveDocuments(id, null, "Emisuite");
 
             old = new File(file.getAbsolutePath() + File.separator + "vt");
             if (old.renameTo(neu)) {
@@ -554,7 +559,7 @@ public class MigrateSystem {
             log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Visual Tracking");
-            documentDto1.setTypeDoc("FOLDER");
+            documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
             implNew.createDocument(documentDto1, "Emisuite");
         }
@@ -565,7 +570,7 @@ public class MigrateSystem {
         if (old.exists()) {
             long id = find(old);
             log.info("{} find, now moving to {}", old, neu);
-            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
+            implNew.moveDocuments(id, null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator + "easy-gmao");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "Easy GMAO");
@@ -574,11 +579,11 @@ public class MigrateSystem {
             log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("Easy GMAO");
-            documentDto1.setTypeDoc("FOLDER");
+            documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
             documentDto1 = implNew.createDocument(documentDto1, "Emisuite");
 
-            documentDto1.setUuid("6d44b088-2324-4afd-b186-514f150205cb");
+            documentDto1.setUuid(UUID.fromString("6d44b088-2324-4afd-b186-514f150205cb"));
 
             DocumentService.updateDocument(documentDto1);
         }
@@ -589,7 +594,7 @@ public class MigrateSystem {
         if (old.exists()) {
             long id = find(old);
             log.info("{} find, now moving to {}", old, neu);
-            implNew.moveDocuments(Math.toIntExact(id), null, "Emisuite");
+            implNew.moveDocuments(id, null, "Emisuite");
             old = new File(file.getAbsolutePath() + File.separator + "my-factory");
             if (old.renameTo(neu)) {
                 updateNew((int) id, "My Factory");
@@ -598,14 +603,14 @@ public class MigrateSystem {
             log.info("{} not find, now creating to {}", old, neu);
             DocumentDto documentDto1 = new DocumentDto();
             documentDto1.setName("My Factory");
-            documentDto1.setTypeDoc("FOLDER");
+            documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
         DocumentDto documentDto1 = new DocumentDto();
         documentDto1.setName("Visual SGA");
-        documentDto1.setTypeDoc("FOLDER");
+        documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
         implNew.createDocument(documentDto1, "Emisuite");
 
@@ -683,18 +688,18 @@ public class MigrateSystem {
             DocumentDto documentDto = new DocumentDto();
 
             documentDto.setName("Digital People");
-            documentDto.setTypeDoc("FOLDER");
+            documentDto.setTypeDoc(TypeDoc.FOLDER);
 
             documentDto = implNew.createDocument(documentDto, file.getName());
 
-            documentDto.setUuid("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
+            documentDto.setUuid(UUID.fromString("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c"));
 
             DocumentService.updateDocument(documentDto);
         } else {
             int position = uuids.indexOf("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
 
             DocumentDto documentDto = implNew.findByUUID(uuids.get(position));
-            implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+            implNew.moveDocuments(documentDto.getIdDocument(), null, "Emisuite");
 
             uuids.remove("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
         }
@@ -702,12 +707,12 @@ public class MigrateSystem {
         if (uuids.size() == 1) {
             if (uuids.get(0).equals("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c")) {
                 DocumentDto documentDto = implNew.findByUUID(uuids.get(0));
-                implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+                implNew.moveDocuments(documentDto.getIdDocument(), null, "Emisuite");
             } else {
                 DocumentDto documentByUUIDDto = implNew.findByUUID(uuids.get(0));
 
                 if (documentByUUIDDto != null) {
-                    implNew.moveDocuments(documentByUUIDDto.getIdDoc(), null, "Emisuite/Digital People");
+                    implNew.moveDocuments(documentByUUIDDto.getIdDocument(), null, "Emisuite/Digital People");
                 }
             }
         } else {
@@ -716,23 +721,23 @@ public class MigrateSystem {
                 if (UUID.equals("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c")) {
                     DocumentDto documentDto = implNew.findByUUID(UUID);
                     if (documentDto != null) {
-                        implNew.moveDocuments(documentDto.getIdDoc(), null, "Emisuite");
+                        implNew.moveDocuments(documentDto.getIdDocument(), null, "Emisuite");
                     }
                 } else {
 
                     DocumentDto documentByUUIDDto = implNew.findByUUID(UUID);
 
                     if (documentByUUIDDto != null) {
-                        implNew.moveDocuments(documentByUUIDDto.getIdDoc(),
+                        implNew.moveDocuments(documentByUUIDDto.getIdDocument(),
                                 null, "Emisuite/Digital People/dp" + i);
                     } else {
                         DocumentDto documentDto = new DocumentDto();
                         documentDto.setName("Digital People");
-                        documentDto.setTypeDoc("FOLDER");
+                        documentDto.setTypeDoc(TypeDoc.FOLDER);
 
                         documentDto = implNew.createDocument(documentDto, "Emisuite/Digital People/dp" + i);
 
-                        documentDto.setUuid(UUID);
+                        documentDto.setUuid(java.util.UUID.fromString(UUID));
 
                         DocumentService.updateDocument(documentDto);
                     }

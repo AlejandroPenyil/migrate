@@ -1,9 +1,11 @@
 package com.soincon.migrate.iservice;
 
-import com.soincon.migrate.dto.oldDtos.DirectoryDto;
-import com.soincon.migrate.dto.oldDtos.PathDto;
-import com.soincon.migrate.filter.FilterDirectory;
-import com.soincon.migrate.filter.PaginatedList;
+import es.snc.common.persistence.PaginatedList;
+import es.snc.common.persistence.filter.Filter;
+import es.snc.document.manager.dto.DirectoryDto;
+import es.snc.document.manager.dto.PathDto;
+import es.snc.document.manager.persistence.filter.DirectoryFilter;
+
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -28,7 +30,7 @@ public interface DirectoryService {
 //                                               @Query("firstResult") Boolean firstResult);
 
     @POST("directories/searchAll")
-    Call<PaginatedList<DirectoryDto>> searchDirectoryByFilterAll(@Body FilterDirectory filterDirectory);
+    Call<PaginatedList<DirectoryDto>> searchDirectoryByFilterAll(@Body Filter<DirectoryFilter> filterDirectory);
 
     @POST("resources/searchByPath")
     Call<List<DirectoryDto>> searchByPath(@Query("includeResourcePath") boolean iResource,

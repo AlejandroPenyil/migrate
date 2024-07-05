@@ -1,7 +1,6 @@
 package com.soincon.migrate.iservice;
 
-
-import com.soincon.migrate.dto.oldDtos.FileTypeDto;
+import es.snc.document.manager.dto.FileTypeDto;
 import retrofit2.Call;
 import retrofit2.http.GET;
 

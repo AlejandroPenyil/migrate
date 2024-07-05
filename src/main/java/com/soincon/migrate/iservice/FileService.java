@@ -1,10 +1,11 @@
 package com.soincon.migrate.iservice;
 
+import es.snc.common.persistence.PaginatedList;
+import es.snc.common.persistence.filter.Filter;
+import es.snc.document.manager.dto.FileDto;
+import es.snc.document.manager.dto.PathDto;
+import es.snc.document.manager.persistence.filter.FileFilter;
 
-import com.soincon.migrate.dto.oldDtos.FileDto;
-import com.soincon.migrate.dto.oldDtos.PathDto;
-import com.soincon.migrate.filter.FilterDirectory;
-import com.soincon.migrate.filter.PaginatedList;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -30,7 +31,7 @@ public interface FileService {
 //                             @Body FileDto dto);
 
     @POST("files/searchAll")
-    Call<PaginatedList<FileDto>> searchFilesByFilter(@Body FilterDirectory filterDirectory);
+    Call<PaginatedList<FileDto>> searchFilesByFilter(@Body Filter<FileFilter> filterDirectory);
 
     @POST("resources/searchByPath")
     Call<List<FileDto>> searchByPath(@Query("includeResourcePath") boolean b,
