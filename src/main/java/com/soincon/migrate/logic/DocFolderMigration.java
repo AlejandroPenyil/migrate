@@ -23,10 +23,7 @@ public class DocFolderMigration {
     public DocFolderMigration(File file, DocumentDto parent) throws IOException {
         this.implNew = new ImplNew();
         this.documentDto = parent;
-//        this.exist = isExist(file);
-//        if(!this.exist) {
         this.idParent = parentId(file);
-//        }
 
     }
 

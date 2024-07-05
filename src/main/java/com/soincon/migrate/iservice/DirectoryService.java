@@ -15,20 +15,6 @@ public interface DirectoryService {
     @GET("/directories/{id}")
     Call<DirectoryDto> getDirectories(@Path("id") String id);
 
-//    @GET("/directories")
-//    Call<List<DirectoryDto>> findDirectories();
-//
-//    @POST("/directories/create-all/logical")
-//    Call<List<DirectoryDto>> createDirectory(@Body List<DirectoryDto> dto);
-//
-//    @PUT("/directories/{id}")
-//    Call<DirectoryDto> updateDirectory(@Body DirectoryDto dto,
-//                                       @Path("id") String id);
-//
-//    @POST("/directories/searchOne")
-//    Call<DirectoryDto> searchDirectoryByFilter(@Body FilterDirectory filterDirectory,
-//                                               @Query("firstResult") Boolean firstResult);
-
     @POST("directories/searchAll")
     Call<PaginatedList<DirectoryDto>> searchDirectoryByFilterAll(@Body Filter<DirectoryFilter> filterDirectory);
 
