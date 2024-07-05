@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.soincon</groupId>
     <artifactId>snc-migrate</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>snc-migrate</name>
     <description>document manager migrate</description>
     <properties>
