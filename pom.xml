@@ -15,6 +15,8 @@
     <description>document manager migrate</description>
     <properties>
         <java.version>11</java.version>
+        <snc-document-manager.version>1.1.0</snc-document-manager.version>
+
     </properties>
     <dependencies>
         <dependency>
@@ -84,6 +86,23 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.29</version>
+        </dependency>
+
+        <dependency>
+            <groupId>emisuite.documentmanager.services</groupId>
+            <artifactId>emisuite-documentmanager-services</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>es.snc.document.manager</groupId>
+            <artifactId>snc-document-manager-service</artifactId>
+            <version>${snc-document-manager.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>es.snc.document.manager</groupId>
+            <artifactId>snc-document-manager-mapper</artifactId>
+            <version>${snc-document-manager.version}</version>
         </dependency>
 
         <dependency>
