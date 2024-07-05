@@ -83,7 +83,6 @@ public class MigrateSystem {
                     ++currentStep;
                     migrate(subFile.getAbsolutePath(), documentDto, directory);
                 }
-
             } else {
                 DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                 File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
@@ -179,7 +178,6 @@ public class MigrateSystem {
                     }
                     i++;
                 } while (t);
-
             }
         }
     }
@@ -365,7 +363,6 @@ public class MigrateSystem {
      * @throws IOException Returns an error if there is any issue with the file.
      */
     public void cleanRoot(String pathRoot, String newRoot) throws Exception {
-
         Path path = Paths.get(pathRoot);
         File directory = path.toFile();
 
@@ -453,7 +450,6 @@ public class MigrateSystem {
                                     }
                                 }
                             } while (!tr);
-
                         }
                     } else {
                         if (!exists(file)) {
@@ -523,7 +519,6 @@ public class MigrateSystem {
     public void newMigration(File f) throws Exception {
         File file = new File(f.getAbsolutePath() + File.separator + "Emisuite");
         if (file.exists()) {
-//            DocumentDto documentDto = findDocument(file);
             moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
         } else {
             DocumentDto documentDto = new DocumentDto();
@@ -613,7 +608,6 @@ public class MigrateSystem {
         documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
         implNew.createDocument(documentDto1, "Emisuite");
-
     }
 
     /**
@@ -680,7 +674,6 @@ public class MigrateSystem {
                     WarningUtil.showWarning("ERROR", "introduce un UUID valido o n para terminar");
                 }
             }
-
         } while (!answer.equalsIgnoreCase("n"));
 
         if (!findDP(uuids)) {
@@ -703,7 +696,6 @@ public class MigrateSystem {
 
             uuids.remove("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c");
         }
-
         if (uuids.size() == 1) {
             if (uuids.get(0).equals("3791fbdb-cb62-4742-9cf3-fc8f79d8a51c")) {
                 DocumentDto documentDto = implNew.findByUUID(uuids.get(0));
@@ -757,7 +749,6 @@ public class MigrateSystem {
         if (answer == null) {
             return false;
         }
-
         try {
             UUID.fromString(answer);
             return true;

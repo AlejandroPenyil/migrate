@@ -36,7 +36,6 @@ public class ImplOld {
         return responseTypes.body();
     }
 
-
     public List<FileDto> findFiles() throws IOException {
         Call<List<FileDto>> call = fileService.findFiles();
         Response<List<FileDto>> response = call.execute();

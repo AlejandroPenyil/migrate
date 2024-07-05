@@ -27,5 +27,4 @@ public class RetroFitNew {
         }
         return retrofit;
     }
-
 }

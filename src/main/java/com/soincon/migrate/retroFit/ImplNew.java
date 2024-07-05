@@ -1,6 +1,5 @@
 package com.soincon.migrate.retroFit;
 
-import emisuite.documentmanager.enums.TypeDoc;
 import emisuite.documentmanager.dto.DocumentDto;
 import emisuite.documentmanager.dto.DocumentVersionDto;
 import com.soincon.migrate.iservice.Authorization;

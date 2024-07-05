@@ -123,8 +123,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             }
         }
 
-
-//        log.info("Enter the new root location (leave empty to use the default path):\n{}", f);
         String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
                 "Introduce la nueva localizacion root (dejalo vacio para usar el path por defecto):\n" + f + "\n");
         if (newRoot.isEmpty()) {

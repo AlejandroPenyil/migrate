@@ -24,5 +24,4 @@ public interface DirectoryService {
                                           @Query("includeDirectoryDescendants") boolean iDirectory,
                                           @Query("level") Integer level,
                                           @Body PathDto pathDto);
-
 }

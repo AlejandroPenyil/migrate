@@ -24,7 +24,6 @@ public class DocFolderMigration {
         this.implNew = new ImplNew();
         this.documentDto = parent;
         this.idParent = parentId(file);
-
     }
 
     private long parentId(File file) throws IOException {
@@ -68,28 +67,4 @@ public class DocFolderMigration {
 
         return path.toString();
     }
-
-//    public boolean isExist(File file) throws IOException {
-//        DocumentDto documentDto = new DocumentDto();
-//
-//        documentDto.setName(file.getName().toLowerCase());
-//
-//        if(this.documentDto != null){
-//            documentDto.setIdParent(this.documentDto.getIdDocument());
-//        }
-//
-//        List<DocumentDto> documentDtos = implNew.search(documentDto);
-//
-//        if (!documentDtos.isEmpty()) {
-//            for (DocumentDto documentDto2 : documentDtos) {
-//                String path = makePath(documentDto2);
-//                if (path.equals(file.getAbsolutePath())) {
-//                    this.documentDto = documentDto2;
-//                    return true;
-//                }
-//            }
-//        }
-//
-//        return false;
-//    }
 }
