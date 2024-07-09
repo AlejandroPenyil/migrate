@@ -559,7 +559,7 @@ public class MigrateSystem {
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(System.getProperty("local.gmao.folder"));
+        old = new File(s + File.separator + System.getProperty("local.gmao.folder"));
         neu = new File(file.getAbsolutePath() + File.separator + "Easy GMAO");
 
         if (old.exists()) {

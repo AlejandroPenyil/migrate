@@ -66,7 +66,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     @CommandLine.Option(names = {"-us", "--userSecurity"}, description = "Usuario para acceder a la api de seguridad", required = true)
     private String userSecurity;
 
-    @CommandLine.Option(names = {"-g", "--easyGmao"}, description = "Nombre de la carpeta Gmao", defaultValue = "C:\\opt\\tools\\tomcat_pro\\latest\\files\\clients\\1\\easy-gmao")
+    @CommandLine.Option(names = {"-g", "--easyGmao"}, description = "Nombre de la carpeta Gmao y su ubicacion desde la carpeta clients", defaultValue = "1\\easy-gmao")
     private String gmao;
 
     public static void main(String[] args) {
@@ -98,7 +98,6 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.setProperty("api.security.base.url", apiSUrl);
         System.setProperty("api.security.user", userSecurity);
         System.setProperty("api.security.password", passwordSecurity);
-        System.setProperty("local.gmao.folder",gmao);
 
         MigrateSystem migrateSystem;
         try {
@@ -114,9 +113,10 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         if (pathroot.isEmpty()) {
             pathroot = odl.getAbsolutePath();
             WarningUtil.showWarning("Usando el path por defecto: {}", pathroot);
+            System.setProperty("local.gmao.folder",odl + File.separator + gmao);
         }
 
-
+        System.setProperty("local.gmao.folder",pathroot + File.separator + gmao);
         File root = new File(pathroot);
         if (!root.exists()) {
             try {
