@@ -66,6 +66,9 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
     @CommandLine.Option(names = {"-us", "--userSecurity"}, description = "Usuario para acceder a la api de seguridad", required = true)
     private String userSecurity;
 
+    @CommandLine.Option(names = {"-g", "--easyGmao"}, description = "Nombre de la carpeta Gmao", defaultValue = "C:\\opt\\tools\\tomcat_pro\\latest\\files\\clients\\1\\easy-gmao")
+    private String gmao;
+
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MigrateApplication());
 
@@ -95,6 +98,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
         System.setProperty("api.security.base.url", apiSUrl);
         System.setProperty("api.security.user", userSecurity);
         System.setProperty("api.security.password", passwordSecurity);
+        System.setProperty("local.gmao.folder",gmao);
 
         MigrateSystem migrateSystem;
         try {

@@ -559,14 +559,14 @@ public class MigrateSystem {
             implNew.createDocument(documentDto1, "Emisuite");
         }
 
-        old = new File(s + File.separator + "1" + File.separator + "easy_gmao");
+        old = new File(System.getProperty("local.gmao.folder"));
         neu = new File(file.getAbsolutePath() + File.separator + "Easy GMAO");
 
         if (old.exists()) {
             long id = find(old);
             log.info("{} find, now moving to {}", old, neu);
             implNew.moveDocuments(id, null, "Emisuite");
-            old = new File(file.getAbsolutePath() + File.separator + "easy-gmao");
+            old = new File(file.getAbsolutePath() + File.separator + old.getName());
             if (old.renameTo(neu)) {
                 updateNew((int) id, "Easy GMAO");
             }
