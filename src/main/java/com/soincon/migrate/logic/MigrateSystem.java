@@ -95,7 +95,7 @@ public class MigrateSystem {
                 do {
                     File nfDirectory = new File(file2 + File.separator + i + "-" + name);
                     if (nfDirectory.mkdir()) {
-                        log.info("{} added to not found", nfDirectory.getName());
+                        log.error("{} added to not found", nfDirectory.getName());
                         t = false;
                     } else {
                         i++;
@@ -172,7 +172,7 @@ public class MigrateSystem {
                             log.error("Cannot create {}", file2);
                         }
                         if (file2.exists()) {
-                            log.info("copy file: {}", file2.getAbsolutePath());
+                            log.error("copy file: {}", file2.getAbsolutePath());
                             t = false;
                         }
                     }
