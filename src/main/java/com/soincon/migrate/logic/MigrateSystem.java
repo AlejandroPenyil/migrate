@@ -129,7 +129,8 @@ public class MigrateSystem {
                         extension = FilenameUtils.getExtension(giveExtension(directory).getAbsolutePath());
                     }
 
-                    String name = removeExtension(directory);
+//                    String name = removeExtension(directory);
+                    String name = directory.getName();
                     do {
                         String fullName = name.toLowerCase() + "_V" + i + '.' + extension;
                         File file2 = new File(directory.getParentFile().getPath() + File.separator + fullName);
