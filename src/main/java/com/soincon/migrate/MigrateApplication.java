@@ -139,31 +139,65 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             log.info("created: {}", f.getAbsolutePath());
         }
 
-        try {
-            migrateSystem.cleanRoot(pathroot, newRoot);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        WarningUtil.showWarning("Importante", "Estas migrando de una migracion previa Y/N");
+        boolean mig;
+        do {
+            String opc = WarningUtil.answer();
+            switch (opc) {
+                case ("y"):
+                case ("Y"):
+                    WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
+                    WarningUtil.showWarning("", "\rEsto llevara un rato...");
 
-        WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
-        WarningUtil.showWarning("", "\rEsto llevara un rato...");
+                    File file = new File(pathroot);
+                    totalFilesAndDirectories = countFilesAndDirectories(file);
+                    try {
+                        ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+                        Thread progressThread = new Thread(progressIndicator);
+                        progressThread.start();
+                        migrateSystem.migrate(pathroot, null, f,false);
+                        progressIndicator.stop();
 
-        File file = new File(pathroot);
-        totalFilesAndDirectories = countFilesAndDirectories(file);
-        try {
-            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-            Thread progressThread = new Thread(progressIndicator);
-            progressThread.start();
-            migrateSystem.migrate(pathroot, null, f);
-            progressIndicator.stop();
+                        System.out.println();
+                        migrateSystem.newMigration(f);
 
-            System.out.println();
-            migrateSystem.newMigration(f);
+                        migrateSystem.config();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    mig = false;
+                    break;
+                case ("n"):
+                case ("N"):
+                    WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
+                    WarningUtil.showWarning("", "\rEsto llevara un rato...");
 
-            migrateSystem.config();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+                    file = new File(pathroot);
+                    totalFilesAndDirectories = countFilesAndDirectories(file);
+                    try {
+                        ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
+                        Thread progressThread = new Thread(progressIndicator);
+                        progressThread.start();
+                        migrateSystem.migrate(pathroot, null, f,true);
+                        progressIndicator.stop();
+
+                        System.out.println();
+                        migrateSystem.newMigration(f);
+
+                        migrateSystem.config();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    mig = false;
+                    break;
+                default:
+                    WarningUtil.showAlert("", "\rElige una opcion Y/N");
+                    mig = true;
+                    break;
+            }
+        } while (mig);
+
+
         System.out.println();
         WarningUtil.showWarning("", "\rMigracion completada.");
 
