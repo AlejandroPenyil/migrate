@@ -88,7 +88,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
      */
     @Override
     public void run() {
-        WarningUtil.showAlert("ALERTA", "Este programa puede hacer cambios que no se podran desacer.");
+        WarningUtil.showAlert("ALERTA", "Este programa puede hacer cambios que no se podran deshacer.");
 
         System.setProperty("api.base.url", api1Url);
         System.setProperty("api2.base.url", api2Url);
