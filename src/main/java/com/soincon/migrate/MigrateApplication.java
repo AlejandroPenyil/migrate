@@ -7,11 +7,14 @@ import lombok.extern.log4j.Log4j2;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import picocli.CommandLine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -23,6 +26,7 @@ import java.util.Scanner;
 
 @SpringBootApplication
 @Log4j2
+@EnableCaching
 @CommandLine.Command(name = "migrate", mixinStandardHelpOptions = true, version = "1.0",
         description = "MigrateApplication, realiza tareas de migración.")
 public class MigrateApplication implements CommandLineRunner, Runnable {
@@ -32,8 +36,7 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             + File.separator + "Soincon"
             + File.separator + "EMI"
             + File.separator + "Cross-Solutions"
-            + File.separator + "Documents"
-            + File.separator + "RepoTest");
+            + File.separator + "Documents");
     private final File odl = new File(File.listRoots()[0].getPath()
             + File.separator + "opt"
             + File.separator + "tools"
@@ -107,23 +110,44 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             throw new RuntimeException(e);
         }
 
+        List<String> roots = new ArrayList<>();
+        boolean noMoreRoots = false;
+
         Scanner src = new Scanner(System.in);
 
-        String pathroot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
-                "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto):\n" + odl + "\n");
-        if (pathroot.isEmpty()) {
-            pathroot = odl.getAbsolutePath();
-            WarningUtil.showWarning("Usando el path por defecto: {}", pathroot);
+        String pathroot = "";
+
+        do {
+            pathroot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
+                    "Introduce la localizacion root a migrar (dejalo vacio para usar el path por defecto), " +
+                            "puedes introducir varios, introduce n para terminar:\n" + odl + "\n");
+            if (pathroot.isEmpty()) {
+                pathroot = odl.getAbsolutePath();
+                WarningUtil.showWarning("Usando el path por defecto: {}", pathroot);
+            }else if(pathroot.equalsIgnoreCase("n")){
+                noMoreRoots = true;
+                break;
+            }
+
+            File root = new File(pathroot);
+            if (!root.exists()) {
+                try {
+                    throw new FileNotFoundException();
+                } catch (FileNotFoundException e) {
+                    WarningUtil.showAlert("ERROR", "La ruta por defecto antigua no ha sido encontrada");
+                    return;
+                }
+            }
+
+            roots.add(pathroot);
+        }while(!noMoreRoots);
+
+        for(String s : roots){
+            System.out.println(s);
         }
 
-        File root = new File(pathroot);
-        if (!root.exists()) {
-            try {
-                throw new FileNotFoundException();
-            } catch (FileNotFoundException e) {
-                WarningUtil.showAlert("ERROR", "La ruta por defecto antigua no ha sido encontrada");
-                return;
-            }
+        if(roots.isEmpty()){
+            return;
         }
 
         String newRoot = WarningUtil.showWarningAndReadInput("IMPORTANTE",
@@ -139,26 +163,29 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
             log.info("created: {}", f.getAbsolutePath());
         }
 
-        WarningUtil.showWarning("Importante", "Estas migrando de una migracion previa Y/N");
+        WarningUtil.showWarning("Importante", "¿Estas migrando de una migracion previa en linux? Y/N");
         boolean mig;
         do {
             String opc = WarningUtil.answer();
             switch (opc) {
                 case ("y"):
                 case ("Y"):
-                    WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
-                    WarningUtil.showWarning("", "\rEsto llevara un rato...");
-
-                    File file = new File(pathroot);
-                    totalFilesAndDirectories = countFilesAndDirectories(file);
                     try {
-                        ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-                        Thread progressThread = new Thread(progressIndicator);
-                        progressThread.start();
-                        migrateSystem.migrate(pathroot, null, f,false);
-                        progressIndicator.stop();
+                        for(String root : roots) {
+                            WarningUtil.showWarning("", "\rModificando todo de: " + root);
+                            WarningUtil.showWarning("", "\rEsto llevara un rato...");
 
-                        System.out.println();
+                            File file = new File(root);
+                            totalFilesAndDirectories = countFilesAndDirectories(file);
+
+                            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories, migrateSystem);
+                            Thread progressThread = new Thread(progressIndicator);
+                            progressThread.start();
+                            migrateSystem.migrate(root, null, f, false);
+                            progressIndicator.stop();
+
+                            System.out.println();
+                        }
                         migrateSystem.newMigration(f);
 
                         migrateSystem.config();
@@ -169,19 +196,22 @@ public class MigrateApplication implements CommandLineRunner, Runnable {
                     break;
                 case ("n"):
                 case ("N"):
-                    WarningUtil.showWarning("", "\rModificando todo de: " + pathroot);
-                    WarningUtil.showWarning("", "\rEsto llevara un rato...");
-
-                    file = new File(pathroot);
-                    totalFilesAndDirectories = countFilesAndDirectories(file);
                     try {
-                        ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories);
-                        Thread progressThread = new Thread(progressIndicator);
-                        progressThread.start();
-                        migrateSystem.migrate(pathroot, null, f,true);
-                        progressIndicator.stop();
+                        for(String root : roots) {
+                            WarningUtil.showWarning("", "\rModificando todo de: " + root);
+                            WarningUtil.showWarning("", "\rEsto llevara un rato...");
 
-                        System.out.println();
+                            File file = new File(root);
+                            totalFilesAndDirectories = countFilesAndDirectories(file);
+
+                            ProgressIndicator progressIndicator = new ProgressIndicator(totalFilesAndDirectories, migrateSystem);
+                            Thread progressThread = new Thread(progressIndicator);
+                            progressThread.start();
+                            migrateSystem.migrate(root, null, f, true);
+                            progressIndicator.stop();
+
+                            System.out.println();
+                        }
                         migrateSystem.newMigration(f);
 
                         migrateSystem.config();

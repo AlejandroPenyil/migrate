@@ -2,21 +2,29 @@ package com.soincon.migrate.logic;
 
 import com.soincon.migrate.command.WarningUtil;
 
+import java.io.IOException;
+
 import static com.soincon.migrate.logic.MigrateSystem.currentStep;
 
 public class ProgressIndicator implements Runnable {
     private static int totalSteps = 1;
     private static long startTime = -1;
     private volatile boolean running = true;
+    private MigrateSystem migrateSystem;
 
-    public ProgressIndicator(int totalSteps) {
+    public ProgressIndicator(int totalSteps, MigrateSystem migrateSystem) {
         ProgressIndicator.totalSteps = totalSteps;
+        this.migrateSystem=migrateSystem;
     }
 
     @Override
     public void run() {
         while (running && currentStep <= totalSteps) {
-            showProgressIndicator();
+            try {
+                showProgressIndicator();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -29,7 +37,7 @@ public class ProgressIndicator implements Runnable {
         running = false;
     }
 
-    private void showProgressIndicator() {
+    private void showProgressIndicator() throws IOException {
         if (startTime == -1) {
             startTime = System.currentTimeMillis();
         }
@@ -45,6 +53,10 @@ public class ProgressIndicator implements Runnable {
         long hours = elapsedTimeSeconds / 3600;
         long minutes = (elapsedTimeSeconds % 3600) / 60;
         long seconds = elapsedTimeSeconds % 60;
+
+//        if(seconds % 3600 == 0) {
+//            migrateSystem.updateJwt();
+//        }
 
         String progressBar = WarningUtil.ANSI_GREEN + "█" + WarningUtil.ANSI_GREEN + "█".repeat(Math.max(0, (int) completedBlocks)) +
                 WarningUtil.ANSI_RED + "▒".repeat(Math.max(0, remainingBlocks)) + WarningUtil.ANSI_GREEN + "█" + WarningUtil.ANSI_WHITE +

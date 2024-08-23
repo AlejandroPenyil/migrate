@@ -18,6 +18,8 @@ import com.soincon.migrate.retroFit.ImplOld;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +28,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.soincon.migrate.MigrateApplication.f;
 import static com.soincon.migrate.retroFit.ImplNew.Jwtoken;
 
 @Log4j2
+@Component
 public class MigrateSystem {
     ImplOld implOld;
     ImplNew implNew;
@@ -53,6 +57,7 @@ public class MigrateSystem {
      * @throws InterruptedException an exception throw by the thread of the progress bar
      */
     public void migrate(String path, DocumentDto parent, File newPath, boolean isRoot) throws Exception {
+
         File file = new File(path);
         if(isRoot){
             cleanRoot(path,newPath.getAbsolutePath());
@@ -77,20 +82,32 @@ public class MigrateSystem {
 
                     documentDto = implNew.createDocument(documentDto, mkdPath);
 
-                    if (uuid != null) {
+                    if (uuid != null && documentDto != null) {
                         documentDto.setUuid(UUID.fromString(uuid));
                         DocumentService.updateDocument(documentDto);
                     }
-                    List<File> fileDirectories = new ArrayList<>();
-                    for (File file1: Objects.requireNonNull(file.listFiles())) {
-                        if(file1.isDirectory()) {
-                            fileDirectories.add(file1);
-                        }
-                    }
-                    for (File subFile : Objects.requireNonNull(fileDirectories)) {
+                    List<File> fileDirectories = List.of(Objects.requireNonNull(file.listFiles()))
+                            .parallelStream()
+                            .filter(File::isDirectory)
+                            .collect(Collectors.toList());
+//                    for (File file1: Objects.requireNonNull(file.listFiles())) {
+//                        if(file1.isDirectory()) {
+//                            fileDirectories.add(file1);
+//                        }
+//                    }
+                    DocumentDto finalDocumentDto = documentDto;
+                    fileDirectories.parallelStream().forEach(subFile -> {
                         ++currentStep;
-                        migrate(subFile.getAbsolutePath(), documentDto, directory, false);
-                    }
+                        try {
+                            migrate(subFile.getAbsolutePath(), finalDocumentDto, directory, false);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+//                    for (File subFile : Objects.requireNonNull(fileDirectories)) {
+//                        ++currentStep;
+//                        migrate(subFile.getAbsolutePath(), documentDto, directory, false);
+//                    }
                 } else {
                     DocFolderMigration docFolderMigration = new DocFolderMigration(directory, parent);
                     File file2 = Paths.get(String.valueOf(f), "notfound").toFile();
@@ -145,6 +162,7 @@ public class MigrateSystem {
 
                     if (uuid != null) {
                         documentDto.setUuid(UUID.fromString(uuid));
+                        log.info(documentDto.getName());
                         DocumentService.updateDocument(documentDto);
                     }
 
@@ -617,14 +635,14 @@ public class MigrateSystem {
     public void newMigration(File f) throws Exception {
         File file = new File(f.getAbsolutePath() + File.separator + "Emisuite");
         if (file.exists()) {
-            moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
+            moveToEmisuite(f.getAbsolutePath(), file);
         } else {
             DocumentDto documentDto = new DocumentDto();
             documentDto.setTypeDoc(TypeDoc.FOLDER);
             documentDto.setName(file.getName());
             implNew.createDocument(documentDto, "");
 
-            moveToEmisuite(f.getAbsolutePath() + File.separator + "clients", file);
+            moveToEmisuite(f.getAbsolutePath(), file);
         }
     }
 
@@ -636,7 +654,7 @@ public class MigrateSystem {
      * @throws Exception IF ANY ERROR OCCUR WITH RETROFIT
      */
     private void moveToEmisuite(String s, File file) throws Exception {
-        File old = new File(s + File.separator + "1" + File.separator + "vt");
+        File old = searchVisualTracking(s);
         File neu = new File(file.getAbsolutePath() + File.separator + "Visual Tracking");
 
         if (old.exists()) {
@@ -681,7 +699,7 @@ public class MigrateSystem {
             DocumentService.updateDocument(documentDto1);
         }
 
-        old = new File(s + File.separator + "clientid-1" + File.separator + "my-factory");
+        old = searchMyFactory(s);
         neu = new File(file.getAbsolutePath() + File.separator + "My Factory");
 
         if (old.exists()) {
@@ -706,6 +724,48 @@ public class MigrateSystem {
         documentDto1.setTypeDoc(TypeDoc.FOLDER);
 
         implNew.createDocument(documentDto1, "Emisuite");
+    }
+
+    private File searchVisualTracking(String s) {
+        File file = new File(s);
+        if (file.exists()) {
+            for(File files : Objects.requireNonNull(file.listFiles(File::isDirectory))){
+                if(files.getName().equalsIgnoreCase("1")){
+                    for(File f : Objects.requireNonNull(files.listFiles(File::isDirectory))){
+                        if(f.getName().equalsIgnoreCase("vt")){
+                            log.info("Found Visual Tracking: {}",f.getAbsolutePath());
+                            return(f);
+                        }
+                    }
+                }else{
+                    file = searchMyFactory(files.getAbsolutePath());
+                }
+            }
+        }
+
+        log.info("Not found Visual Tracking");
+        return file;
+    }
+
+    private File searchMyFactory(String s) {
+        File file = new File(s);
+        if (file.exists()) {
+            for(File files : Objects.requireNonNull(file.listFiles(File::isDirectory))){
+                if(files.getName().equalsIgnoreCase("clientid-1")){
+                    for(File f : Objects.requireNonNull(files.listFiles(File::isDirectory))){
+                        if(f.getName().equalsIgnoreCase("my-factory")){
+                            log.info("Found my-factory: {}",f.getAbsolutePath());
+                            return(f);
+                        }
+                    }
+                }else{
+                    file = searchMyFactory(files.getAbsolutePath());
+                }
+            }
+        }
+
+        log.info("Not found my factory");
+        return file;
     }
 
     /**
@@ -868,5 +928,10 @@ public class MigrateSystem {
             }
         }
         return false;
+    }
+
+    @Bean
+    public void updateJwt() throws IOException {
+        implNew.updateJwt();
     }
 }
